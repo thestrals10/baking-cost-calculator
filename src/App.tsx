@@ -246,23 +246,19 @@ const loadSavedData = () => {
     }
   }
   return {
-    recipeName: 'Sourdough Bread',
-    ingredients: [
-      { name: 'Whole Wheat Flour', quantity: 500, unit: 'g', packageSize: 2268, packageUnit: 'g', packagePrice: 10 },
-      { name: 'Water', quantity: 350, unit: 'g', packageSize: 1000, packageUnit: 'g', packagePrice: 0 },
-      { name: 'Salt', quantity: 10, unit: 'g', packageSize: 737, packageUnit: 'g', packagePrice: 2 },
-    ],
-    preheatTime: 15,
-    bakeTime: 45,
-    bakeTemp: 450,
-    mixerTime: 10,
-    laborTime: 30,
+    recipeName: '',
+    ingredients: [],
+    preheatTime: 0,
+    bakeTime: 0,
+    bakeTemp: 350,
+    mixerTime: 0,
+    laborTime: 0,
     laborRate: 20,
-    packagingCost: 0.5,
-    yieldQty: 2,
-    yieldUnit: 'loaves',
-    gasRate: 1.5,
-    electricRate: 0.15,
+    packagingCost: 0,
+    yieldQty: 1,
+    yieldUnit: 'unit',
+    gasRate: 2.6,
+    electricRate: 0.18,
   }
 }
 
