@@ -56,18 +56,60 @@ const INGREDIENT_DENSITIES: { [key: string]: number } = {
   'milk': 1.03,
   'cream': 1.01,
   'oil': 0.92,
+  'olive oil': 0.92,
+  'vegetable oil': 0.92,
+  'coconut oil': 0.92,
   'butter': 0.911,  // melted
   'honey': 1.42,
   'syrup': 1.37,
-  // Dry ingredients
+  'maple syrup': 1.33,
+  'molasses': 1.42,
+  'vanilla extract': 0.88,
+  'almond extract': 0.88,
+  'vanilla': 0.88,
+  'buttermilk': 1.03,
+  'yogurt': 1.04,
+  'kefir': 1.04,
+  'sour cream': 1.02,
+  'cream cheese': 1.04,
+  'sourdough starter': 1.0,
+  'eggs': 1.03,
+  'egg': 1.03,
+  // Dry ingredients - Flours
   'flour': 0.528,  // all-purpose flour, spooned and leveled
+  'all-purpose flour': 0.528,
+  'bread flour': 0.54,
+  'cake flour': 0.51,
+  'whole wheat flour': 0.51,
+  'rye flour': 0.53,
+  // Dry ingredients - Sugars
   'sugar': 0.845,  // granulated sugar
+  'granulated sugar': 0.845,
   'brown sugar': 0.845,
+  'powdered sugar': 0.56,
+  'confectioners sugar': 0.56,
+  // Dry ingredients - Leavening & Spices
   'salt': 1.217,
   'baking powder': 0.9,
   'baking soda': 0.9,
-  'cocoa': 0.54,
   'yeast': 0.64,
+  'cinnamon': 0.56,
+  'spice': 0.56,
+  'spices': 0.56,
+  // Dry ingredients - Other
+  'cocoa': 0.54,
+  'cocoa powder': 0.54,
+  'cornstarch': 0.68,
+  'chocolate chips': 0.68,
+  'chocolate': 0.68,
+  'nuts': 0.53,
+  'chopped nuts': 0.53,
+  'raisins': 0.68,
+  'dried fruit': 0.68,
+  'coconut': 0.35,
+  'shredded coconut': 0.35,
+  'oats': 0.34,
+  'rolled oats': 0.34,
 }
 
 // Helper to guess ingredient from name
