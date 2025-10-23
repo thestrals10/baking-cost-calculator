@@ -266,7 +266,10 @@ function App() {
       laborRate: 20,
       gasRate: 2.6,
       electricRate: 0.18,
-      packagingOptions: []
+      packagingOptions: [
+        { id: '1', name: 'Cake board and box', cost: 2.0 },
+        { id: '2', name: 'Bread bag', cost: 0.2 }
+      ]
     }
   })
   const settings = isUsingFirestore ? firestoreSettings.data : localSettings
