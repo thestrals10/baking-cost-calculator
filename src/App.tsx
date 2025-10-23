@@ -244,7 +244,11 @@ function App() {
   const firestoreIngredientDB = useFirestoreCollection<IngredientDatabase>('ingredients')
   const [localIngredientDB, setLocalIngredientDB] = useState<IngredientDatabase[]>(() => {
     const saved = localStorage.getItem('ingredientDatabase')
-    return saved ? JSON.parse(saved) : defaultIngredients
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return parsed.length > 0 ? parsed : defaultIngredients
+    }
+    return defaultIngredients
   })
   const ingredientDB = isUsingFirestore ? firestoreIngredientDB.data : localIngredientDB
   const [showIngredientDB, setShowIngredientDB] = useState(false)
