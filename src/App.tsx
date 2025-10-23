@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import { useAuth } from './AuthContext'
+import LoginScreen from './LoginScreen'
+import { useFirestoreCollection } from './useFirestoreCollection'
+import { useFirestoreDoc } from './useFirestoreDoc'
 
 // Unit conversion tables
 const WEIGHT_CONVERSIONS: { [key: string]: number } = {
@@ -219,31 +223,40 @@ const loadSavedData = () => {
 }
 
 function App() {
+  const { user, loading, signOut } = useAuth()
   const savedData = loadSavedData()
 
-  // Recipe catalog
-  const [catalog, setCatalog] = useState<Recipe[]>(() => {
-    const saved = localStorage.getItem('recipeCatalog')
-    return saved ? JSON.parse(saved) : []
-  })
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🍞</div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    return <LoginScreen />
+  }
+
+  // Recipe catalog - now synced with Firestore
+  const { data: catalog, loading: catalogLoading, add: addRecipe, update: updateRecipe, remove: removeRecipe } = useFirestoreCollection<Recipe>('recipes')
   const [showCatalog, setShowCatalog] = useState(false)
 
-  // Ingredient database
-  const [ingredientDB, setIngredientDB] = useState<IngredientDatabase[]>(() => {
-    const saved = localStorage.getItem('ingredientDatabase')
-    return saved ? JSON.parse(saved) : []
-  })
+  // Ingredient database - now synced with Firestore
+  const { data: ingredientDB, loading: ingredientDBLoading, add: addIngredientDB, update: updateIngredientDB, remove: removeIngredientDB } = useFirestoreCollection<IngredientDatabase>('ingredients')
   const [showIngredientDB, setShowIngredientDB] = useState(false)
 
-  // Settings database
-  const [settings, setSettings] = useState<Settings>(() => {
-    const saved = localStorage.getItem('settings')
-    return saved ? JSON.parse(saved) : {
-      laborRate: 20,
-      gasRate: 1.5,
-      electricRate: 0.15,
-      packagingOptions: []
-    }
+  // Settings database - now synced with Firestore
+  const { data: settings, loading: settingsLoading, update: updateSettingsDoc } = useFirestoreDoc<Settings>('settings/data', {
+    laborRate: 20,
+    gasRate: 1.5,
+    electricRate: 0.15,
+    packagingOptions: []
   })
   const [showSettings, setShowSettings] = useState(false)
 
@@ -277,14 +290,13 @@ function App() {
   const [electricRate, setElectricRate] = useState(savedData.electricRate)
 
   // Save recipe to catalog
-  const saveRecipeToCatalog = (totalCost: number, costPerUnit: number) => {
+  const saveRecipeToCatalog = async (totalCost: number, costPerUnit: number) => {
     if (!recipeName.trim()) {
       alert('⚠️ Please enter a recipe name before saving!')
       return
     }
 
-    const newRecipe: Recipe = {
-      id: Date.now().toString(),
+    const recipeData = {
       recipeName,
       ingredients: [...ingredients],
       preheatTime,
@@ -304,22 +316,22 @@ function App() {
     }
 
     // Check if recipe with same name exists
-    const existingIndex = catalog.findIndex(r => r.recipeName === recipeName)
-    let updatedCatalog
+    const existing = catalog.find(r => r.recipeName === recipeName)
 
-    if (existingIndex >= 0) {
-      // Update existing recipe
-      updatedCatalog = [...catalog]
-      updatedCatalog[existingIndex] = newRecipe
-      alert('✅ Recipe updated in catalog!')
-    } else {
-      // Add new recipe
-      updatedCatalog = [...catalog, newRecipe]
-      alert('✅ Recipe saved to catalog!')
+    try {
+      if (existing) {
+        // Update existing recipe
+        await updateRecipe(existing.id, recipeData)
+        alert('✅ Recipe updated in catalog!')
+      } else {
+        // Add new recipe
+        await addRecipe(recipeData)
+        alert('✅ Recipe saved to catalog!')
+      }
+    } catch (error) {
+      console.error('Error saving recipe:', error)
+      alert('❌ Failed to save recipe. Please try again.')
     }
-
-    setCatalog(updatedCatalog)
-    localStorage.setItem('recipeCatalog', JSON.stringify(updatedCatalog))
   }
 
   // Load recipe from catalog
@@ -342,43 +354,52 @@ function App() {
   }
 
   // Delete recipe from catalog
-  const deleteRecipe = (id: string) => {
+  const deleteRecipe = async (id: string) => {
     if (confirm('Are you sure you want to delete this recipe?')) {
-      const updatedCatalog = catalog.filter(r => r.id !== id)
-      setCatalog(updatedCatalog)
-      localStorage.setItem('recipeCatalog', JSON.stringify(updatedCatalog))
-      alert('✅ Recipe deleted!')
+      try {
+        await removeRecipe(id)
+        alert('✅ Recipe deleted!')
+      } catch (error) {
+        console.error('Error deleting recipe:', error)
+        alert('❌ Failed to delete recipe. Please try again.')
+      }
     }
   }
 
   // Ingredient database management
-  const addIngredientToDB = () => {
-    const newIngredient: IngredientDatabase = {
-      id: Date.now().toString(),
+  const addIngredientToDB = async () => {
+    const newIngredient = {
       name: '',
       packageSize: 0,
       packageUnit: 'g',
       packagePrice: 0
     }
-    const updated = [...ingredientDB, newIngredient]
-    setIngredientDB(updated)
-    localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+    try {
+      await addIngredientDB(newIngredient)
+    } catch (error) {
+      console.error('Error adding ingredient to database:', error)
+      alert('❌ Failed to add ingredient. Please try again.')
+    }
   }
 
-  const updateIngredientDB = (id: string, field: keyof Omit<IngredientDatabase, 'id'>, value: string | number) => {
-    const updated = ingredientDB.map(ing =>
-      ing.id === id ? { ...ing, [field]: value } : ing
-    )
-    setIngredientDB(updated)
-    localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+  const updateIngredientInDB = async (id: string, field: keyof Omit<IngredientDatabase, 'id'>, value: string | number) => {
+    try {
+      await updateIngredientDB(id, { [field]: value })
+    } catch (error) {
+      console.error('Error updating ingredient:', error)
+      alert('❌ Failed to update ingredient. Please try again.')
+    }
   }
 
-  const deleteIngredientFromDB = (id: string) => {
+  const deleteIngredientFromDB = async (id: string) => {
     if (confirm('Are you sure you want to delete this ingredient from the database?')) {
-      const updated = ingredientDB.filter(ing => ing.id !== id)
-      setIngredientDB(updated)
-      localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
-      alert('✅ Ingredient deleted from database!')
+      try {
+        await removeIngredientDB(id)
+        alert('✅ Ingredient deleted from database!')
+      } catch (error) {
+        console.error('Error deleting ingredient:', error)
+        alert('❌ Failed to delete ingredient. Please try again.')
+      }
     }
   }
 
@@ -397,34 +418,42 @@ function App() {
   }
 
   // Settings management
-  const updateSettings = (field: keyof Settings, value: any) => {
-    const updated = { ...settings, [field]: value }
-    setSettings(updated)
-    localStorage.setItem('settings', JSON.stringify(updated))
+  const updateSettings = async (field: keyof Settings, value: any) => {
+    try {
+      await updateSettingsDoc({ [field]: value })
+    } catch (error) {
+      console.error('Error updating settings:', error)
+      alert('❌ Failed to update settings. Please try again.')
+    }
   }
 
-  const addPackagingOption = () => {
+  const addPackagingOption = async () => {
     const newOption: PackagingOption = {
       id: Date.now().toString(),
       name: '',
       cost: 0
     }
     const updated = [...settings.packagingOptions, newOption]
-    updateSettings('packagingOptions', updated)
+    await updateSettings('packagingOptions', updated)
   }
 
-  const updatePackagingOption = (id: string, field: keyof Omit<PackagingOption, 'id'>, value: string | number) => {
+  const updatePackagingOption = async (id: string, field: keyof Omit<PackagingOption, 'id'>, value: string | number) => {
     const updated = settings.packagingOptions.map(opt =>
       opt.id === id ? { ...opt, [field]: value } : opt
     )
-    updateSettings('packagingOptions', updated)
+    await updateSettings('packagingOptions', updated)
   }
 
-  const deletePackagingOption = (id: string) => {
+  const deletePackagingOption = async (id: string) => {
     if (confirm('Are you sure you want to delete this packaging option?')) {
-      const updated = settings.packagingOptions.filter(opt => opt.id !== id)
-      updateSettings('packagingOptions', updated)
-      alert('✅ Packaging option deleted!')
+      try {
+        const updated = settings.packagingOptions.filter(opt => opt.id !== id)
+        await updateSettings('packagingOptions', updated)
+        alert('✅ Packaging option deleted!')
+      } catch (error) {
+        console.error('Error deleting packaging option:', error)
+        alert('❌ Failed to delete packaging option. Please try again.')
+      }
     }
   }
 
@@ -538,7 +567,10 @@ function App() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
+            <p className="text-sm text-gray-600 mt-1">Welcome, {user.displayName || user.email}</p>
+          </div>
           <div className="flex gap-3">
             <button
               onClick={startNewRecipe}
@@ -569,6 +601,12 @@ function App() {
               className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-700 transition shadow-md"
             >
               ⚙️ {showSettings ? 'Hide' : 'Show'} Settings
+            </button>
+            <button
+              onClick={signOut}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
+            >
+              🚪 Logout
             </button>
           </div>
         </div>
@@ -648,21 +686,21 @@ function App() {
                       type="text"
                       placeholder="Flour"
                       value={ing.name}
-                      onChange={(e) => updateIngredientDB(ing.id, 'name', e.target.value)}
+                      onChange={(e) => updateIngredientInDB(ing.id, 'name', e.target.value)}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     <input
                       type="number"
                       placeholder="2268"
                       value={ing.packageSize === 0 ? '' : ing.packageSize}
-                      onChange={(e) => updateIngredientDB(ing.id, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
+                      onChange={(e) => updateIngredientInDB(ing.id, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     <input
                       type="text"
                       placeholder="g"
                       value={ing.packageUnit}
-                      onChange={(e) => updateIngredientDB(ing.id, 'packageUnit', e.target.value)}
+                      onChange={(e) => updateIngredientInDB(ing.id, 'packageUnit', e.target.value)}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     <input
@@ -670,7 +708,7 @@ function App() {
                       step="0.01"
                       placeholder="10.00"
                       value={ing.packagePrice === 0 ? '' : ing.packagePrice}
-                      onChange={(e) => updateIngredientDB(ing.id, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
+                      onChange={(e) => updateIngredientInDB(ing.id, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     <button
