@@ -227,23 +227,6 @@ function App() {
   const savedData = loadSavedData()
   const [guestMode, setGuestMode] = useState(false)
 
-  // Show loading screen while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🍞</div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Show login screen if not authenticated and not in guest mode
-  if (!user && !guestMode) {
-    return <LoginScreen onSkip={() => setGuestMode(true)} />
-  }
-
   // Determine if using Firestore (logged in) or localStorage (guest)
   const isUsingFirestore = !!user
 
@@ -283,6 +266,23 @@ function App() {
   })
   const settings = isUsingFirestore ? firestoreSettings.data : localSettings
   const [showSettings, setShowSettings] = useState(false)
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🍞</div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show login screen if not authenticated and not in guest mode
+  if (!user && !guestMode) {
+    return <LoginScreen onSkip={() => setGuestMode(true)} />
+  }
 
   // Recipe info
   const [recipeName, setRecipeName] = useState(savedData.recipeName)
