@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 // Unit conversion tables
 const WEIGHT_CONVERSIONS: { [key: string]: number } = {
