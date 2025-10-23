@@ -256,16 +256,16 @@ function App() {
   // Settings database - Firestore for logged-in users, localStorage for guests
   const firestoreSettings = useFirestoreDoc<Settings>('settings/data', {
     laborRate: 20,
-    gasRate: 1.5,
-    electricRate: 0.15,
+    gasRate: 2.0,
+    electricRate: 0.18,
     packagingOptions: []
   })
   const [localSettings, setLocalSettings] = useState<Settings>(() => {
     const saved = localStorage.getItem('settings')
     return saved ? JSON.parse(saved) : {
       laborRate: 20,
-      gasRate: 1.5,
-      electricRate: 0.15,
+      gasRate: 2.0,
+      electricRate: 0.18,
       packagingOptions: []
     }
   })
