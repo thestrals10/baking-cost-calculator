@@ -225,6 +225,7 @@ const loadSavedData = () => {
 function App() {
   const { user, loading, signOut } = useAuth()
   const savedData = loadSavedData()
+  const [guestMode, setGuestMode] = useState(false)
 
   // Show loading screen while checking authentication
   if (loading) {
@@ -238,26 +239,49 @@ function App() {
     )
   }
 
-  // Show login screen if not authenticated
-  if (!user) {
-    return <LoginScreen />
+  // Show login screen if not authenticated and not in guest mode
+  if (!user && !guestMode) {
+    return <LoginScreen onSkip={() => setGuestMode(true)} />
   }
 
-  // Recipe catalog - now synced with Firestore
-  const { data: catalog, add: addRecipe, update: updateRecipe, remove: removeRecipe } = useFirestoreCollection<Recipe>('recipes')
+  // Determine if using Firestore (logged in) or localStorage (guest)
+  const isUsingFirestore = !!user
+
+  // Recipe catalog - Firestore for logged-in users, localStorage for guests
+  const firestoreCatalog = useFirestoreCollection<Recipe>('recipes')
+  const [localCatalog, setLocalCatalog] = useState<Recipe[]>(() => {
+    const saved = localStorage.getItem('recipeCatalog')
+    return saved ? JSON.parse(saved) : []
+  })
+  const catalog = isUsingFirestore ? firestoreCatalog.data : localCatalog
   const [showCatalog, setShowCatalog] = useState(false)
 
-  // Ingredient database - now synced with Firestore
-  const { data: ingredientDB, add: addIngredientDB, update: updateIngredientDB, remove: removeIngredientDB } = useFirestoreCollection<IngredientDatabase>('ingredients')
+  // Ingredient database - Firestore for logged-in users, localStorage for guests
+  const firestoreIngredientDB = useFirestoreCollection<IngredientDatabase>('ingredients')
+  const [localIngredientDB, setLocalIngredientDB] = useState<IngredientDatabase[]>(() => {
+    const saved = localStorage.getItem('ingredientDatabase')
+    return saved ? JSON.parse(saved) : []
+  })
+  const ingredientDB = isUsingFirestore ? firestoreIngredientDB.data : localIngredientDB
   const [showIngredientDB, setShowIngredientDB] = useState(false)
 
-  // Settings database - now synced with Firestore
-  const { data: settings, update: updateSettingsDoc } = useFirestoreDoc<Settings>('settings/data', {
+  // Settings database - Firestore for logged-in users, localStorage for guests
+  const firestoreSettings = useFirestoreDoc<Settings>('settings/data', {
     laborRate: 20,
     gasRate: 1.5,
     electricRate: 0.15,
     packagingOptions: []
   })
+  const [localSettings, setLocalSettings] = useState<Settings>(() => {
+    const saved = localStorage.getItem('settings')
+    return saved ? JSON.parse(saved) : {
+      laborRate: 20,
+      gasRate: 1.5,
+      electricRate: 0.15,
+      packagingOptions: []
+    }
+  })
+  const settings = isUsingFirestore ? firestoreSettings.data : localSettings
   const [showSettings, setShowSettings] = useState(false)
 
   // Recipe info
@@ -319,14 +343,28 @@ function App() {
     const existing = catalog.find(r => r.recipeName === recipeName)
 
     try {
-      if (existing) {
-        // Update existing recipe
-        await updateRecipe(existing.id, recipeData)
-        alert('✅ Recipe updated in catalog!')
+      if (isUsingFirestore) {
+        // Firestore mode
+        if (existing) {
+          await firestoreCatalog.update(existing.id, recipeData)
+          alert('✅ Recipe updated in catalog!')
+        } else {
+          await firestoreCatalog.add(recipeData)
+          alert('✅ Recipe saved to catalog!')
+        }
       } else {
-        // Add new recipe
-        await addRecipe(recipeData)
-        alert('✅ Recipe saved to catalog!')
+        // localStorage mode
+        const newRecipe = { ...recipeData, id: existing?.id || Date.now().toString() }
+        let updatedCatalog
+        if (existing) {
+          updatedCatalog = catalog.map(r => r.id === existing.id ? newRecipe : r)
+          alert('✅ Recipe updated in catalog!')
+        } else {
+          updatedCatalog = [...catalog, newRecipe]
+          alert('✅ Recipe saved to catalog!')
+        }
+        setLocalCatalog(updatedCatalog as Recipe[])
+        localStorage.setItem('recipeCatalog', JSON.stringify(updatedCatalog))
       }
     } catch (error) {
       console.error('Error saving recipe:', error)
@@ -357,7 +395,13 @@ function App() {
   const deleteRecipe = async (id: string) => {
     if (confirm('Are you sure you want to delete this recipe?')) {
       try {
-        await removeRecipe(id)
+        if (isUsingFirestore) {
+          await firestoreCatalog.remove(id)
+        } else {
+          const updatedCatalog = catalog.filter(r => r.id !== id)
+          setLocalCatalog(updatedCatalog as Recipe[])
+          localStorage.setItem('recipeCatalog', JSON.stringify(updatedCatalog))
+        }
         alert('✅ Recipe deleted!')
       } catch (error) {
         console.error('Error deleting recipe:', error)
@@ -375,7 +419,14 @@ function App() {
       packagePrice: 0
     }
     try {
-      await addIngredientDB(newIngredient)
+      if (isUsingFirestore) {
+        await firestoreIngredientDB.add(newIngredient)
+      } else {
+        const withId = { ...newIngredient, id: Date.now().toString() }
+        const updated = [...ingredientDB, withId]
+        setLocalIngredientDB(updated as IngredientDatabase[])
+        localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+      }
     } catch (error) {
       console.error('Error adding ingredient to database:', error)
       alert('❌ Failed to add ingredient. Please try again.')
@@ -384,7 +435,15 @@ function App() {
 
   const updateIngredientInDB = async (id: string, field: keyof Omit<IngredientDatabase, 'id'>, value: string | number) => {
     try {
-      await updateIngredientDB(id, { [field]: value })
+      if (isUsingFirestore) {
+        await firestoreIngredientDB.update(id, { [field]: value })
+      } else {
+        const updated = ingredientDB.map(ing =>
+          ing.id === id ? { ...ing, [field]: value } : ing
+        )
+        setLocalIngredientDB(updated as IngredientDatabase[])
+        localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+      }
     } catch (error) {
       console.error('Error updating ingredient:', error)
       alert('❌ Failed to update ingredient. Please try again.')
@@ -394,7 +453,13 @@ function App() {
   const deleteIngredientFromDB = async (id: string) => {
     if (confirm('Are you sure you want to delete this ingredient from the database?')) {
       try {
-        await removeIngredientDB(id)
+        if (isUsingFirestore) {
+          await firestoreIngredientDB.remove(id)
+        } else {
+          const updated = ingredientDB.filter(ing => ing.id !== id)
+          setLocalIngredientDB(updated as IngredientDatabase[])
+          localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+        }
         alert('✅ Ingredient deleted from database!')
       } catch (error) {
         console.error('Error deleting ingredient:', error)
@@ -420,7 +485,13 @@ function App() {
   // Settings management
   const updateSettings = async (field: keyof Settings, value: any) => {
     try {
-      await updateSettingsDoc({ [field]: value })
+      if (isUsingFirestore) {
+        await firestoreSettings.update({ [field]: value })
+      } else {
+        const updated = { ...settings, [field]: value }
+        setLocalSettings(updated)
+        localStorage.setItem('settings', JSON.stringify(updated))
+      }
     } catch (error) {
       console.error('Error updating settings:', error)
       alert('❌ Failed to update settings. Please try again.')
@@ -569,7 +640,15 @@ function App() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
-            <p className="text-sm text-gray-600 mt-1">Welcome, {user.displayName || user.email}</p>
+            {user ? (
+              <p className="text-sm text-gray-600 mt-1">
+                ☁️ Synced • {user.displayName || user.email}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600 mt-1">
+                💾 Local storage only • <button onClick={() => setGuestMode(false)} className="text-blue-600 hover:underline">Sign in to sync</button>
+              </p>
+            )}
           </div>
           <div className="flex gap-3">
             <button
@@ -602,12 +681,14 @@ function App() {
             >
               ⚙️ {showSettings ? 'Hide' : 'Show'} Settings
             </button>
-            <button
-              onClick={signOut}
-              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
-            >
-              🚪 Logout
-            </button>
+            {user && (
+              <button
+                onClick={signOut}
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
+              >
+                🚪 Logout
+              </button>
+            )}
           </div>
         </div>
 
