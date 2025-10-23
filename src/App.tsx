@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext'
 import LoginScreen from './LoginScreen'
 import { useFirestoreCollection } from './useFirestoreCollection'
 import { useFirestoreDoc } from './useFirestoreDoc'
+import { defaultIngredients } from './defaultIngredients'
 
 // Unit conversion tables
 const WEIGHT_CONVERSIONS: { [key: string]: number } = {
@@ -243,7 +244,7 @@ function App() {
   const firestoreIngredientDB = useFirestoreCollection<IngredientDatabase>('ingredients')
   const [localIngredientDB, setLocalIngredientDB] = useState<IngredientDatabase[]>(() => {
     const saved = localStorage.getItem('ingredientDatabase')
-    return saved ? JSON.parse(saved) : []
+    return saved ? JSON.parse(saved) : defaultIngredients
   })
   const ingredientDB = isUsingFirestore ? firestoreIngredientDB.data : localIngredientDB
   const [showIngredientDB, setShowIngredientDB] = useState(false)
