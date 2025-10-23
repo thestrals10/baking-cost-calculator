@@ -4,6 +4,7 @@ import LoginScreen from './LoginScreen'
 import { useFirestoreCollection } from './useFirestoreCollection'
 import { useFirestoreDoc } from './useFirestoreDoc'
 import { defaultIngredients } from './defaultIngredients'
+import { defaultRecipes } from './defaultRecipes'
 
 // Unit conversion tables
 const WEIGHT_CONVERSIONS: { [key: string]: number } = {
@@ -277,7 +278,11 @@ function App() {
   const firestoreCatalog = useFirestoreCollection<Recipe>('recipes')
   const [localCatalog, setLocalCatalog] = useState<Recipe[]>(() => {
     const saved = localStorage.getItem('recipeCatalog')
-    return saved ? JSON.parse(saved) : []
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return parsed.length > 0 ? parsed : defaultRecipes
+    }
+    return defaultRecipes
   })
   const catalog = isUsingFirestore ? firestoreCatalog.data : localCatalog
   const [showCatalog, setShowCatalog] = useState(false)
