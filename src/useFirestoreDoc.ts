@@ -22,7 +22,7 @@ export function useFirestoreDoc<T>(docPath: string, defaultValue: T) {
         setData(snapshot.data() as T);
       } else {
         // Document doesn't exist yet, use default and create it
-        setDoc(docRef, defaultValue).catch(console.error);
+        setDoc(docRef, defaultValue as any).catch(console.error);
         setData(defaultValue);
       }
       setLoading(false);
@@ -40,7 +40,7 @@ export function useFirestoreDoc<T>(docPath: string, defaultValue: T) {
     try {
       const docRef = doc(db, 'users', user.uid, docPath);
       const newData = { ...data, ...updates };
-      await setDoc(docRef, newData);
+      await setDoc(docRef, newData as any);
       setData(newData);
     } catch (error) {
       console.error(`Error updating ${docPath}:`, error);

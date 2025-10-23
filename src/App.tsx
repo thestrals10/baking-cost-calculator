@@ -244,15 +244,15 @@ function App() {
   }
 
   // Recipe catalog - now synced with Firestore
-  const { data: catalog, loading: catalogLoading, add: addRecipe, update: updateRecipe, remove: removeRecipe } = useFirestoreCollection<Recipe>('recipes')
+  const { data: catalog, add: addRecipe, update: updateRecipe, remove: removeRecipe } = useFirestoreCollection<Recipe>('recipes')
   const [showCatalog, setShowCatalog] = useState(false)
 
   // Ingredient database - now synced with Firestore
-  const { data: ingredientDB, loading: ingredientDBLoading, add: addIngredientDB, update: updateIngredientDB, remove: removeIngredientDB } = useFirestoreCollection<IngredientDatabase>('ingredients')
+  const { data: ingredientDB, add: addIngredientDB, update: updateIngredientDB, remove: removeIngredientDB } = useFirestoreCollection<IngredientDatabase>('ingredients')
   const [showIngredientDB, setShowIngredientDB] = useState(false)
 
   // Settings database - now synced with Firestore
-  const { data: settings, loading: settingsLoading, update: updateSettingsDoc } = useFirestoreDoc<Settings>('settings/data', {
+  const { data: settings, update: updateSettingsDoc } = useFirestoreDoc<Settings>('settings/data', {
     laborRate: 20,
     gasRate: 1.5,
     electricRate: 0.15,
