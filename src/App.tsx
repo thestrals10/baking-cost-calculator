@@ -917,37 +917,36 @@ function App() {
             {ingredientDB.length === 0 ? (
               <p className="text-gray-500 text-center py-8">No ingredients in database yet. Add your commonly used ingredients!</p>
             ) : (
-              <div className="overflow-x-auto">
-                <div className="min-w-[600px] space-y-3">
-                  <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2">
-                    <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Name</div>
-                    <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg size</div>
-                    <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg unit</div>
-                    <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg price</div>
-                    <div className="w-[3.25rem]"></div>
-                  </div>
-                  {ingredientDB.map((ing) => (
-                    <div key={ing.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
+              <div className="space-y-3">
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2">
+                  <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
+                  <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg size</div>
+                  <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg unit</div>
+                  <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg price</div>
+                  <div className="w-[3.25rem] flex-shrink-0"></div>
+                </div>
+                {ingredientDB.map((ing) => (
+                  <div key={ing.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
                     <input
                       type="text"
                       placeholder="Flour"
                       value={ing.name}
                       onChange={(e) => updateIngredientInDB(ing.id, 'name', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
                     />
                     <input
                       type="number"
                       placeholder="2268"
                       value={ing.packageSize === 0 ? '' : ing.packageSize}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
                     />
                     <input
                       type="text"
                       placeholder="g"
                       value={ing.packageUnit}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packageUnit', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
                     />
                     <input
                       type="number"
@@ -955,17 +954,16 @@ function App() {
                       placeholder="10.00"
                       value={ing.packagePrice === 0 ? '' : ing.packagePrice}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
                     />
                     <button
                       onClick={() => deleteIngredientFromDB(ing.id)}
-                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition w-[3.25rem]"
+                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition w-[3.25rem] flex-shrink-0"
                     >
                       ✕
                     </button>
                   </div>
-                  ))}
-                </div>
+                ))}
               </div>
             )}
           </div>
