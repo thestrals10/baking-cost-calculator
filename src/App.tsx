@@ -818,15 +818,19 @@ function App() {
             )}
             {user && (
               <>
-                <label className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md cursor-pointer">
+                <button
+                  onClick={() => document.getElementById('import-file-input')?.click()}
+                  className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md"
+                >
                   📥 Import Data
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={importData}
-                    className="hidden"
-                  />
-                </label>
+                </button>
+                <input
+                  id="import-file-input"
+                  type="file"
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden"
+                />
                 <button
                   onClick={signOut}
                   className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
