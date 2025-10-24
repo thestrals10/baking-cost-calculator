@@ -1093,19 +1093,19 @@ function App() {
 
           {/* Column Labels - using grid for perfect alignment */}
           <div className="grid grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Name</div>
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Used qty</div>
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Unit</div>
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg size</div>
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg unit</div>
-            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg price</div>
-            <div></div> {/* Spacer for delete button */}
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg size</div>
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg unit</div>
+            <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg price</div>
+            <div className="w-[3.25rem] flex-shrink-0"></div> {/* Spacer for delete button */}
           </div>
 
           <div className="space-y-3">
             {ingredients.map((ing, idx) => (
               <div key={idx} className="grid grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                <div className="relative flex gap-1">
+                <div className="relative flex gap-1" style={{ minWidth: 0 }}>
                   <input
                     type="text"
                     placeholder="Type or select from DB"
@@ -1113,6 +1113,7 @@ function App() {
                     onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     list={`ingredient-suggestions-${idx}`}
+                    style={{ width: '100%', minWidth: 0 }}
                   />
                   <datalist id={`ingredient-suggestions-${idx}`}>
                     {ingredientDB.map((dbIng) => (
@@ -1132,6 +1133,7 @@ function App() {
                       }}
                       className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
                       defaultValue=""
+                      style={{ flexShrink: 0 }}
                     >
                       <option value="">📋</option>
                       {ingredientDB.map((dbIng) => (
@@ -1148,6 +1150,7 @@ function App() {
                   value={ing.quantity === 0 ? '' : ing.quantity}
                   onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : Number(e.target.value))}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', minWidth: 0 }}
                 />
                 <input
                   type="text"
@@ -1155,6 +1158,7 @@ function App() {
                   value={ing.unit}
                   onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', minWidth: 0 }}
                 />
                 <input
                   type="number"
@@ -1162,6 +1166,7 @@ function App() {
                   value={ing.packageSize === 0 ? '' : ing.packageSize}
                   onChange={(e) => updateIngredient(idx, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', minWidth: 0 }}
                 />
                 <input
                   type="text"
@@ -1169,6 +1174,7 @@ function App() {
                   value={ing.packageUnit}
                   onChange={(e) => updateIngredient(idx, 'packageUnit', e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', minWidth: 0 }}
                 />
                 <input
                   type="number"
@@ -1177,10 +1183,12 @@ function App() {
                   value={ing.packagePrice === 0 ? '' : ing.packagePrice}
                   onChange={(e) => updateIngredient(idx, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', minWidth: 0 }}
                 />
                 <button
                   onClick={() => removeIngredient(idx)}
                   className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                  style={{ width: '3.25rem', flexShrink: 0 }}
                 >
                   ✕
                 </button>
