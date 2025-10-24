@@ -296,6 +296,11 @@ function App() {
   const ingredientDB = isUsingFirestore ? firestoreIngredientDB.data : localIngredientDB
   const [showIngredientDB, setShowIngredientDB] = useState(false)
 
+  // Debug: Log ingredient IDs
+  if (isUsingFirestore && ingredientDB.length > 0) {
+    console.log('Current ingredients in DB:', ingredientDB.map(ing => ({ id: ing.id, name: ing.name })))
+  }
+
   // Settings database - Firestore for logged-in users, localStorage for guests
   const firestoreSettings = useFirestoreDoc<Settings>('settings/data', {
     laborRate: 20,
