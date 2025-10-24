@@ -718,45 +718,57 @@ function App() {
       const text = await file.text()
       const importedData = JSON.parse(text)
 
+      console.log('Imported data:', importedData)
+
       // Validate the imported data
       if (!importedData.recipes || !importedData.ingredients) {
         alert('❌ Invalid file format. Please select a valid export file.')
         return
       }
 
-      let importedCount = 0
+      let importedRecipes = 0
+      let importedIngredients = 0
 
-      // Import recipes
+      // Import recipes (skip only the default example if user hasn't modified it)
       for (const recipe of importedData.recipes) {
-        // Skip default recipes
-        if (recipe.id === '1' && recipe.recipeName === 'French-Style Country Bread') {
+        // Only skip the exact default recipe
+        if (recipe.recipeName === 'French-Style Country Bread' && recipe.ingredients?.length === 7) {
+          console.log('Skipping default French-Style Country Bread recipe')
           continue
         }
+        console.log('Importing recipe:', recipe.recipeName)
         await firestoreCatalog.add(recipe)
-        importedCount++
+        importedRecipes++
       }
 
-      // Import ingredients
+      // Import ingredients (skip only defaults)
       for (const ingredient of importedData.ingredients) {
-        // Skip default ingredients
-        const isDefault = defaultIngredients.find(def => def.name === ingredient.name)
-        if (isDefault) continue
-
+        const isDefault = defaultIngredients.find(def =>
+          def.name === ingredient.name &&
+          def.packagePrice === ingredient.packagePrice
+        )
+        if (isDefault) {
+          console.log('Skipping default ingredient:', ingredient.name)
+          continue
+        }
+        console.log('Importing ingredient:', ingredient.name)
         await firestoreIngredientDB.add(ingredient)
+        importedIngredients++
       }
 
       // Import settings if customized
       if (importedData.settings) {
+        console.log('Importing settings')
         await firestoreSettings.update(importedData.settings)
       }
 
-      alert(`✅ Import successful! Imported ${importedCount} recipes and synced to the cloud.`)
+      alert(`✅ Import successful!\n${importedRecipes} recipes\n${importedIngredients} ingredients\nSynced to the cloud!`)
 
       // Reset file input
       event.target.value = ''
     } catch (error) {
       console.error('Import error:', error)
-      alert('❌ Failed to import data. Please check the file and try again.')
+      alert('❌ Failed to import data. Please check the file and try again.\nError: ' + (error as Error).message)
     }
   }
 
