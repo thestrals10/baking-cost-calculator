@@ -250,7 +250,7 @@ const loadSavedData = () => {
     ingredients: [],
     preheatTime: 0,
     bakeTime: 0,
-    bakeTemp: 350,
+    bakeTemp: 0,
     mixerTime: 0,
     laborTime: 0,
     laborRate: 20,
