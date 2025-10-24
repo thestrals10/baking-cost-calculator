@@ -503,18 +503,24 @@ function App() {
 
   const deleteIngredientFromDB = async (id: string) => {
     if (confirm('Are you sure you want to delete this ingredient from the database?')) {
+      console.log('Deleting ingredient with id:', id)
+      console.log('Using Firestore:', isUsingFirestore)
       try {
         if (isUsingFirestore) {
+          console.log('Attempting Firestore delete...')
           await firestoreIngredientDB.remove(id)
+          console.log('Firestore delete successful')
         } else {
+          console.log('Attempting localStorage delete...')
           const updated = ingredientDB.filter(ing => ing.id !== id)
           setLocalIngredientDB(updated as IngredientDatabase[])
           localStorage.setItem('ingredientDatabase', JSON.stringify(updated))
+          console.log('localStorage delete successful')
         }
         alert('✅ Ingredient deleted from database!')
       } catch (error) {
         console.error('Error deleting ingredient:', error)
-        alert('❌ Failed to delete ingredient. Please try again.')
+        alert('❌ Failed to delete ingredient. Error: ' + (error as Error).message)
       }
     }
   }
