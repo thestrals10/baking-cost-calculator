@@ -1105,7 +1105,7 @@ function App() {
           <div className="space-y-3">
             {ingredients.map((ing, idx) => (
               <div key={idx} className="grid grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                <div className="relative flex gap-1" style={{ minWidth: 0 }}>
+                <div className="relative flex gap-1" style={{ width: '100%', minWidth: 0 }}>
                   <input
                     type="text"
                     placeholder="Type or select from DB"
@@ -1113,7 +1113,7 @@ function App() {
                     onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     list={`ingredient-suggestions-${idx}`}
-                    style={{ width: '100%', minWidth: 0 }}
+                    style={{ minWidth: 0 }}
                   />
                   <datalist id={`ingredient-suggestions-${idx}`}>
                     {ingredientDB.map((dbIng) => (
@@ -1133,7 +1133,7 @@ function App() {
                       }}
                       className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
                       defaultValue=""
-                      style={{ flexShrink: 0 }}
+                      style={{ width: 'auto', flexShrink: 0 }}
                     >
                       <option value="">📋</option>
                       {ingredientDB.map((dbIng) => (
