@@ -30,7 +30,10 @@ export function useFirestoreCollection<T>(collectionName: string) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const items: T[] = [];
       snapshot.forEach((doc) => {
-        items.push({ id: doc.id, ...doc.data() } as T);
+        const data = doc.data();
+        // Remove any 'id' field from the data and use Firestore's doc.id instead
+        const { id: _, ...dataWithoutId } = data as any;
+        items.push({ id: doc.id, ...dataWithoutId } as T);
       });
       console.log(`Firestore snapshot update for ${collectionName}:`, items.length, 'items');
       setData(items);
