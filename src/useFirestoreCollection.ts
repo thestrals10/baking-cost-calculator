@@ -32,6 +32,7 @@ export function useFirestoreCollection<T>(collectionName: string) {
       snapshot.forEach((doc) => {
         items.push({ id: doc.id, ...doc.data() } as T);
       });
+      console.log(`Firestore snapshot update for ${collectionName}:`, items.length, 'items');
       setData(items);
       setLoading(false);
     }, (error) => {
