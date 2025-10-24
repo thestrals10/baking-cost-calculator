@@ -729,28 +729,15 @@ function App() {
       let importedRecipes = 0
       let importedIngredients = 0
 
-      // Import recipes (skip only the default example if user hasn't modified it)
+      // Import all recipes
       for (const recipe of importedData.recipes) {
-        // Only skip the exact default recipe
-        if (recipe.recipeName === 'French-Style Country Bread' && recipe.ingredients?.length === 7) {
-          console.log('Skipping default French-Style Country Bread recipe')
-          continue
-        }
         console.log('Importing recipe:', recipe.recipeName)
         await firestoreCatalog.add(recipe)
         importedRecipes++
       }
 
-      // Import ingredients (skip only defaults)
+      // Import all ingredients
       for (const ingredient of importedData.ingredients) {
-        const isDefault = defaultIngredients.find(def =>
-          def.name === ingredient.name &&
-          def.packagePrice === ingredient.packagePrice
-        )
-        if (isDefault) {
-          console.log('Skipping default ingredient:', ingredient.name)
-          continue
-        }
         console.log('Importing ingredient:', ingredient.name)
         await firestoreIngredientDB.add(ingredient)
         importedIngredients++
