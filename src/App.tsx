@@ -732,14 +732,18 @@ function App() {
       // Import all recipes
       for (const recipe of importedData.recipes) {
         console.log('Importing recipe:', recipe.recipeName)
-        await firestoreCatalog.add(recipe)
+        // Remove id field before adding (Firestore will create a new one)
+        const { id, ...recipeWithoutId } = recipe
+        await firestoreCatalog.add(recipeWithoutId)
         importedRecipes++
       }
 
       // Import all ingredients
       for (const ingredient of importedData.ingredients) {
         console.log('Importing ingredient:', ingredient.name)
-        await firestoreIngredientDB.add(ingredient)
+        // Remove id field before adding (Firestore will create a new one)
+        const { id, ...ingredientWithoutId } = ingredient
+        await firestoreIngredientDB.add(ingredientWithoutId)
         importedIngredients++
       }
 
