@@ -932,21 +932,24 @@ function App() {
                       placeholder="Flour"
                       value={ing.name}
                       onChange={(e) => updateIngredientInDB(ing.id, 'name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      style={{ width: '100%', minWidth: 0 }}
                     />
                     <input
                       type="number"
                       placeholder="2268"
                       value={ing.packageSize === 0 ? '' : ing.packageSize}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      style={{ width: '100%', minWidth: 0 }}
                     />
                     <input
                       type="text"
                       placeholder="g"
                       value={ing.packageUnit}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packageUnit', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      style={{ width: '100%', minWidth: 0 }}
                     />
                     <input
                       type="number"
@@ -954,11 +957,13 @@ function App() {
                       placeholder="10.00"
                       value={ing.packagePrice === 0 ? '' : ing.packagePrice}
                       onChange={(e) => updateIngredientInDB(ing.id, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 min-w-0"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      style={{ width: '100%', minWidth: 0 }}
                     />
                     <button
                       onClick={() => deleteIngredientFromDB(ing.id)}
-                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition w-[3.25rem] flex-shrink-0"
+                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                      style={{ width: '3.25rem', flexShrink: 0 }}
                     >
                       ✕
                     </button>
