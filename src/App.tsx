@@ -685,6 +685,81 @@ function App() {
   const costPerUnit = yieldQty > 0 ? grandTotal / yieldQty : 0
   const costPerUnitWithoutLabor = yieldQty > 0 ? grandTotalWithoutLabor / yieldQty : 0
 
+  // Export data function (for guest mode)
+  const exportData = () => {
+    const exportData = {
+      recipes: localCatalog,
+      ingredients: localIngredientDB,
+      settings: localSettings,
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    }
+
+    const dataStr = JSON.stringify(exportData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `baking-data-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    alert('✅ Data exported successfully! Save this file to import later when you sign in.')
+  }
+
+  // Import data function (for signed-in mode)
+  const importData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const importedData = JSON.parse(text)
+
+      // Validate the imported data
+      if (!importedData.recipes || !importedData.ingredients) {
+        alert('❌ Invalid file format. Please select a valid export file.')
+        return
+      }
+
+      let importedCount = 0
+
+      // Import recipes
+      for (const recipe of importedData.recipes) {
+        // Skip default recipes
+        if (recipe.id === '1' && recipe.recipeName === 'French-Style Country Bread') {
+          continue
+        }
+        await firestoreCatalog.add(recipe)
+        importedCount++
+      }
+
+      // Import ingredients
+      for (const ingredient of importedData.ingredients) {
+        // Skip default ingredients
+        const isDefault = defaultIngredients.find(def => def.name === ingredient.name)
+        if (isDefault) continue
+
+        await firestoreIngredientDB.add(ingredient)
+      }
+
+      // Import settings if customized
+      if (importedData.settings) {
+        await firestoreSettings.update(importedData.settings)
+      }
+
+      alert(`✅ Import successful! Imported ${importedCount} recipes and synced to the cloud.`)
+
+      // Reset file input
+      event.target.value = ''
+    } catch (error) {
+      console.error('Import error:', error)
+      alert('❌ Failed to import data. Please check the file and try again.')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -732,13 +807,33 @@ function App() {
             >
               ⚙️ {showSettings ? 'Hide' : 'Show'} Settings
             </button>
-            {user && (
+            {!user && (
               <button
-                onClick={signOut}
-                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
+                onClick={exportData}
+                className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md"
+                title="Export all your recipes and data to a file"
               >
-                🚪 Logout
+                📤 Export Data
               </button>
+            )}
+            {user && (
+              <>
+                <label className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md cursor-pointer">
+                  📥 Import Data
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importData}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  onClick={signOut}
+                  className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
+                >
+                  🚪 Logout
+                </button>
+              </>
             )}
           </div>
         </div>
