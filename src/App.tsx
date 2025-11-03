@@ -5,8 +5,6 @@ import { useFirestoreCollection } from './useFirestoreCollection'
 import { useFirestoreDoc } from './useFirestoreDoc'
 import { defaultIngredients } from './defaultIngredients'
 import { defaultRecipes } from './defaultRecipes'
-import { storage } from './firebase'
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 // Unit conversion tables
 const WEIGHT_CONVERSIONS: { [key: string]: number } = {
@@ -205,7 +203,6 @@ interface Recipe {
   savedAt: string
   totalCost?: number
   costPerUnit?: number
-  imageUrl?: string
 }
 
 interface IngredientDatabase {
@@ -328,9 +325,6 @@ function App() {
 
   // Recipe info
   const [recipeName, setRecipeName] = useState(savedData.recipeName)
-  const [recipeImage, setRecipeImage] = useState<File | null>(null)
-  const [recipeImageUrl, setRecipeImageUrl] = useState<string>(savedData.imageUrl || '')
-  const [recipeImagePreview, setRecipeImagePreview] = useState<string>(savedData.imageUrl || '')
 
   // Ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>(savedData.ingredients)
@@ -382,70 +376,29 @@ function App() {
       return
     }
 
+    const recipeData = {
+      recipeName,
+      ingredients: [...ingredients],
+      preheatTime,
+      bakeTime,
+      bakeTemp,
+      mixerTime,
+      laborTime,
+      laborRate,
+      packagingCost,
+      yieldQty,
+      yieldUnit,
+      gasRate,
+      electricRate,
+      savedAt: new Date().toISOString(),
+      totalCost,
+      costPerUnit
+    }
+
     // Check if recipe with same name exists
     const existing = catalog.find(r => r.recipeName === recipeName)
 
     try {
-      let imageUrl = recipeImageUrl || existing?.imageUrl || ''
-      console.log('Saving recipe - imageUrl before upload:', imageUrl)
-      console.log('Has recipeImage file:', !!recipeImage)
-      console.log('User signed in:', !!user)
-
-      // Handle image upload for signed-in users
-      if (recipeImage && user) {
-        console.log('Uploading image for signed-in user...')
-        // Generate ID for new recipe or use existing ID
-        const recipeId = existing?.id || Date.now().toString()
-
-        // Delete old image if updating recipe
-        if (existing?.imageUrl && existing.imageUrl !== recipeImageUrl) {
-          await deleteImage(existing.imageUrl)
-        }
-
-        // Upload new image
-        imageUrl = await uploadImage(recipeImage, recipeId)
-        console.log('Image uploaded successfully:', imageUrl)
-        setRecipeImageUrl(imageUrl)
-        setRecipeImagePreview(imageUrl)
-      }
-
-      // For guest mode with image, convert to base64 and store in localStorage
-      if (recipeImage && !user) {
-        console.log('Converting image to base64 for guest mode...')
-        const reader = new FileReader()
-        imageUrl = await new Promise((resolve) => {
-          reader.onload = (e) => resolve(e.target?.result as string)
-          reader.readAsDataURL(recipeImage)
-        })
-        console.log('Image converted to base64, length:', imageUrl.length)
-      }
-
-      console.log('Final imageUrl to save:', imageUrl)
-
-      const recipeData: any = {
-        recipeName,
-        ingredients: [...ingredients],
-        preheatTime,
-        bakeTime,
-        bakeTemp,
-        mixerTime,
-        laborTime,
-        laborRate,
-        packagingCost,
-        yieldQty,
-        yieldUnit,
-        gasRate,
-        electricRate,
-        savedAt: new Date().toISOString(),
-        totalCost,
-        costPerUnit
-      }
-
-      // Only add imageUrl if it exists
-      if (imageUrl) {
-        recipeData.imageUrl = imageUrl
-      }
-
       if (isUsingFirestore) {
         // Firestore mode
         if (existing) {
@@ -469,9 +422,6 @@ function App() {
         setLocalCatalog(updatedCatalog as Recipe[])
         localStorage.setItem('recipeCatalog', JSON.stringify(updatedCatalog))
       }
-
-      // Clear the file input after successful save
-      setRecipeImage(null)
     } catch (error) {
       console.error('Error saving recipe:', error)
       alert('❌ Failed to save recipe. Please try again.')
@@ -493,9 +443,6 @@ function App() {
     setYieldUnit(recipe.yieldUnit)
     setGasRate(recipe.gasRate)
     setElectricRate(recipe.electricRate)
-    setRecipeImageUrl(recipe.imageUrl || '')
-    setRecipeImagePreview(recipe.imageUrl || '')
-    setRecipeImage(null) // Clear file input
     setShowCatalog(false)
     alert('✅ Recipe loaded!')
   }
@@ -504,12 +451,6 @@ function App() {
   const deleteRecipe = async (id: string) => {
     if (confirm('Are you sure you want to delete this recipe?')) {
       try {
-        // Find recipe and delete its image if it exists
-        const recipe = catalog.find(r => r.id === id)
-        if (recipe?.imageUrl && user) {
-          await deleteImage(recipe.imageUrl)
-        }
-
         if (isUsingFirestore) {
           await firestoreCatalog.remove(id)
         } else {
@@ -665,9 +606,6 @@ function App() {
       setYieldUnit('')
       setGasRate(settings.gasRate)
       setElectricRate(settings.electricRate)
-      setRecipeImage(null)
-      setRecipeImageUrl('')
-      setRecipeImagePreview('')
       alert('✅ Started new recipe!')
     }
   }
@@ -684,116 +622,6 @@ function App() {
 
   const removeIngredient = (index: number) => {
     setIngredients(ingredients.filter((_, i) => i !== index))
-  }
-
-  // IMAGE HANDLING
-
-  const compressImage = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = (event) => {
-        const img = new Image()
-        img.src = event.target?.result as string
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          let width = img.width
-          let height = img.height
-
-          // Resize if image is too large
-          const maxSize = 800
-          if (width > height && width > maxSize) {
-            height = (height * maxSize) / width
-            width = maxSize
-          } else if (height > maxSize) {
-            width = (width * maxSize) / height
-            height = maxSize
-          }
-
-          canvas.width = width
-          canvas.height = height
-          const ctx = canvas.getContext('2d')
-          ctx?.drawImage(img, 0, 0, width, height)
-
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now()
-              })
-              resolve(compressedFile)
-            } else {
-              reject(new Error('Failed to compress image'))
-            }
-          }, 'image/jpeg', 0.8)
-        }
-        img.onerror = () => reject(new Error('Failed to load image'))
-      }
-      reader.onerror = () => reject(new Error('Failed to read file'))
-    })
-  }
-
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
-      return
-    }
-
-    // Validate file size (max 5MB before compression)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB')
-      return
-    }
-
-    try {
-      // Compress image
-      const compressedFile = await compressImage(file)
-      setRecipeImage(compressedFile)
-
-      // Create preview
-      const previewUrl = URL.createObjectURL(compressedFile)
-      setRecipeImagePreview(previewUrl)
-    } catch (error) {
-      console.error('Error processing image:', error)
-      alert('Failed to process image. Please try another file.')
-    }
-  }
-
-  const removeImage = () => {
-    setRecipeImage(null)
-    setRecipeImagePreview('')
-    setRecipeImageUrl('')
-  }
-
-  const uploadImage = async (file: File, recipeId: string): Promise<string> => {
-    if (!user) {
-      throw new Error('Must be signed in to upload images')
-    }
-
-    const storageRef = ref(storage, `recipes/${user.uid}/${recipeId}`)
-    await uploadBytes(storageRef, file)
-    const downloadURL = await getDownloadURL(storageRef)
-    return downloadURL
-  }
-
-  const deleteImage = async (imageUrl: string) => {
-    if (!user || !imageUrl) return
-
-    try {
-      // Extract path from URL
-      const pathStart = imageUrl.indexOf('/o/') + 3
-      const pathEnd = imageUrl.indexOf('?')
-      const fullPath = decodeURIComponent(imageUrl.substring(pathStart, pathEnd))
-
-      const imageRef = ref(storage, fullPath)
-      await deleteObject(imageRef)
-    } catch (error) {
-      console.error('Error deleting image:', error)
-    }
   }
 
   // CALCULATIONS
@@ -1041,38 +869,29 @@ function App() {
                     key={recipe.id}
                     className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 transition"
                   >
-                    <div className="flex gap-4">
-                      {recipe.imageUrl && (
-                        <img
-                          src={recipe.imageUrl}
-                          alt={recipe.recipeName}
-                          className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">{recipe.recipeName}</h3>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>Yield: {recipe.yieldQty} {recipe.yieldUnit}</p>
-                            <p>Total Cost: <span className="font-semibold text-green-700">${recipe.totalCost?.toFixed(2) || '0.00'}</span></p>
-                            <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')}: <span className="font-semibold text-blue-700">${recipe.costPerUnit?.toFixed(2) || '0.00'}</span></p>
-                            <p className="text-xs text-gray-400">Saved: {new Date(recipe.savedAt).toLocaleDateString()} {new Date(recipe.savedAt).toLocaleTimeString()}</p>
-                          </div>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{recipe.recipeName}</h3>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>Yield: {recipe.yieldQty} {recipe.yieldUnit}</p>
+                          <p>Total Cost: <span className="font-semibold text-green-700">${recipe.totalCost?.toFixed(2) || '0.00'}</span></p>
+                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')}: <span className="font-semibold text-blue-700">${recipe.costPerUnit?.toFixed(2) || '0.00'}</span></p>
+                          <p className="text-xs text-gray-400">Saved: {new Date(recipe.savedAt).toLocaleDateString()} {new Date(recipe.savedAt).toLocaleTimeString()}</p>
                         </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => loadRecipe(recipe)}
-                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
-                          >
-                            Load
-                          </button>
-                          <button
-                            onClick={() => deleteRecipe(recipe.id)}
-                            className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => loadRecipe(recipe)}
+                          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
+                        >
+                          Load
+                        </button>
+                        <button
+                          onClick={() => deleteRecipe(recipe.id)}
+                          className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1258,46 +1077,6 @@ function App() {
             onChange={(e) => setRecipeName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
-
-        {/* Recipe Image */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recipe Image (Optional)</h2>
-
-          {recipeImagePreview ? (
-            <div className="mb-4">
-              <img
-                src={recipeImagePreview}
-                alt="Recipe preview"
-                className="max-w-md w-full h-auto rounded-lg border border-gray-300"
-              />
-              <button
-                onClick={removeImage}
-                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-              >
-                Remove Image
-              </button>
-            </div>
-          ) : (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-                id="recipe-image-input"
-              />
-              <label
-                htmlFor="recipe-image-input"
-                className="cursor-pointer inline-block px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-              >
-                📷 Choose Image
-              </label>
-              <p className="mt-2 text-sm text-gray-500">
-                {user ? 'Upload an image (max 5MB, will be compressed to 800px)' : 'Images stored locally in guest mode'}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Ingredients */}

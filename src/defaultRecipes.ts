@@ -25,7 +25,6 @@ export interface Recipe {
   savedAt: string
   totalCost?: number
   costPerUnit?: number
-  imageUrl?: string
 }
 
 export const defaultRecipes: Recipe[] = [
