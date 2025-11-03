@@ -1331,7 +1331,7 @@ function App() {
         </div>
 
         {/* Energy Rates */}
-        <div className="bg-white rounded-lg shadow p-6 mb-12">
+        <div className="bg-white rounded-lg shadow p-6 mb-16">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Energy Rates</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -1358,7 +1358,7 @@ function App() {
         </div>
 
         {/* Cost Breakdown */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg px-6 pb-6 pt-4 shadow-lg">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg px-6 pb-6 pt-1 shadow-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">💰 Cost Breakdown</h2>
 
           {/* Ingredients */}
