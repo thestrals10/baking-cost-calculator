@@ -775,56 +775,56 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
             {user ? (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 ☁️ Synced • {user.displayName || user.email}
               </p>
             ) : (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 💾 Local storage only • <button onClick={() => setGuestMode(false)} className="text-blue-600 hover:underline">Sign in to sync</button>
               </p>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={startNewRecipe}
-              className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition shadow-md"
+              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-orange-700 transition shadow-md whitespace-nowrap"
             >
               ✨ New Recipe
             </button>
             <button
               onClick={() => saveRecipeToCatalog(grandTotal, costPerUnit)}
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition shadow-md"
+              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-green-700 transition shadow-md whitespace-nowrap"
             >
               💾 Save Recipe
             </button>
             <button
               onClick={() => setShowCatalog(!showCatalog)}
-              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition shadow-md"
+              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-blue-700 transition shadow-md whitespace-nowrap"
             >
               📚 {showCatalog ? 'Hide' : 'Show'} Catalog ({catalog.length})
             </button>
             <button
               onClick={() => setShowIngredientDB(!showIngredientDB)}
-              className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition shadow-md"
+              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-purple-700 transition shadow-md whitespace-nowrap"
             >
-              🗄️ {showIngredientDB ? 'Hide' : 'Show'} Ingredients DB ({ingredientDB.length})
+              🗄️ Ingredients DB ({ingredientDB.length})
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-700 transition shadow-md"
+              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-gray-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-gray-700 transition shadow-md whitespace-nowrap"
             >
-              ⚙️ {showSettings ? 'Hide' : 'Show'} Settings
+              ⚙️ Settings
             </button>
             {!user && (
               <button
                 onClick={exportData}
-                className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md"
+                className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
                 title="Export all your recipes and data to a file"
               >
                 📤 Export Data
@@ -834,7 +834,7 @@ function App() {
               <>
                 <button
                   onClick={() => document.getElementById('import-file-input')?.click()}
-                  className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition shadow-md"
+                  className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
                 >
                   📥 Import Data
                 </button>
@@ -847,7 +847,7 @@ function App() {
                 />
                 <button
                   onClick={signOut}
-                  className="px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition shadow-md"
+                  className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-red-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-red-700 transition shadow-md whitespace-nowrap"
                 >
                   🚪 Logout
                 </button>
