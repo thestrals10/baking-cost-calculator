@@ -1331,7 +1331,7 @@ function App() {
         </div>
 
         {/* Energy Rates */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Energy Rates</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
