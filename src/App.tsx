@@ -1429,30 +1429,28 @@ function App() {
           </div>
 
           {/* Totals */}
-          <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-400 rounded-lg p-6 mt-6">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xl font-bold text-gray-900">Grand Total</span>
-              <span className="text-2xl font-bold text-green-700">${grandTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-center mb-3 text-sm">
-              <span className="text-gray-700">Grand Total (without labor)</span>
-              <span className="font-semibold text-green-600">${grandTotalWithoutLabor.toFixed(2)}</span>
-            </div>
-            <div className="border-t-2 border-green-300 pt-3 flex justify-between items-center mb-2">
-              <span className="text-lg font-semibold text-gray-800">
-                Cost per {yieldUnit.toLowerCase()}
-              </span>
-              <span className="text-3xl font-bold text-green-600">
-                ${costPerUnit.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-700">Cost per {yieldUnit.toLowerCase()} (without labor)</span>
-              <span className="font-semibold text-green-600">${costPerUnitWithoutLabor.toFixed(2)}</span>
-            </div>
-            <div className="text-center text-sm text-gray-600 mt-3">
-              Based on {yieldQty} {yieldUnit.toLowerCase()}
-            </div>
+          <div className="flex justify-between items-center mt-6 mb-3">
+            <span className="text-xl font-bold text-gray-900">Grand Total</span>
+            <span className="text-2xl font-bold text-green-700">${grandTotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center mb-3 text-sm">
+            <span className="text-gray-700">Grand Total (without labor)</span>
+            <span className="font-semibold text-green-600">${grandTotalWithoutLabor.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center mt-6 mb-2">
+            <span className="text-lg font-semibold text-gray-800">
+              Cost per {yieldUnit.toLowerCase()}
+            </span>
+            <span className="text-3xl font-bold text-green-600">
+              ${costPerUnit.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-700">Cost per {yieldUnit.toLowerCase()} (without labor)</span>
+            <span className="font-semibold text-green-600">${costPerUnitWithoutLabor.toFixed(2)}</span>
+          </div>
+          <div className="text-center text-sm text-gray-600 mt-3">
+            Based on {yieldQty} {yieldUnit.toLowerCase()}
           </div>
         </div>
       </div>
