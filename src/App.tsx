@@ -793,38 +793,38 @@ function App() {
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={startNewRecipe}
-              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-orange-700 transition shadow-md whitespace-nowrap"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-orange-700 transition shadow-md whitespace-nowrap"
             >
               ✨ New Recipe
             </button>
             <button
               onClick={() => saveRecipeToCatalog(grandTotal, costPerUnit)}
-              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-green-700 transition shadow-md whitespace-nowrap"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-green-700 transition shadow-md whitespace-nowrap"
             >
               💾 Save Recipe
             </button>
             <button
               onClick={() => setShowCatalog(!showCatalog)}
-              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-blue-700 transition shadow-md whitespace-nowrap"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-blue-700 transition shadow-md whitespace-nowrap"
             >
               📚 {showCatalog ? 'Hide' : 'Show'} Catalog ({catalog.length})
             </button>
             <button
               onClick={() => setShowIngredientDB(!showIngredientDB)}
-              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-purple-700 transition shadow-md whitespace-nowrap"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-purple-700 transition shadow-md whitespace-nowrap"
             >
               🗄️ Ingredients DB ({ingredientDB.length})
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-gray-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-gray-700 transition shadow-md whitespace-nowrap"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-gray-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-gray-700 transition shadow-md whitespace-nowrap"
             >
               ⚙️ Settings
             </button>
             {!user && (
               <button
                 onClick={exportData}
-                className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
+                className="px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
                 title="Export all your recipes and data to a file"
               >
                 📤 Export Data
@@ -834,7 +834,7 @@ function App() {
               <>
                 <button
                   onClick={() => document.getElementById('import-file-input')?.click()}
-                  className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
+                  className="px-3 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-indigo-700 transition shadow-md whitespace-nowrap"
                 >
                   📥 Import Data
                 </button>
@@ -847,7 +847,7 @@ function App() {
                 />
                 <button
                   onClick={signOut}
-                  className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 bg-red-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-red-700 transition shadow-md whitespace-nowrap"
+                  className="px-3 sm:px-6 py-2 sm:py-3 bg-red-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-red-700 transition shadow-md whitespace-nowrap"
                 >
                   🚪 Logout
                 </button>
