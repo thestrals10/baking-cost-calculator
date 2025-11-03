@@ -386,10 +386,14 @@ function App() {
     const existing = catalog.find(r => r.recipeName === recipeName)
 
     try {
-      let imageUrl = recipeImageUrl
+      let imageUrl = recipeImageUrl || existing?.imageUrl || ''
+      console.log('Saving recipe - imageUrl before upload:', imageUrl)
+      console.log('Has recipeImage file:', !!recipeImage)
+      console.log('User signed in:', !!user)
 
       // Handle image upload for signed-in users
       if (recipeImage && user) {
+        console.log('Uploading image for signed-in user...')
         // Generate ID for new recipe or use existing ID
         const recipeId = existing?.id || Date.now().toString()
 
@@ -400,20 +404,25 @@ function App() {
 
         // Upload new image
         imageUrl = await uploadImage(recipeImage, recipeId)
+        console.log('Image uploaded successfully:', imageUrl)
         setRecipeImageUrl(imageUrl)
         setRecipeImagePreview(imageUrl)
       }
 
       // For guest mode with image, convert to base64 and store in localStorage
       if (recipeImage && !user) {
+        console.log('Converting image to base64 for guest mode...')
         const reader = new FileReader()
         imageUrl = await new Promise((resolve) => {
           reader.onload = (e) => resolve(e.target?.result as string)
           reader.readAsDataURL(recipeImage)
         })
+        console.log('Image converted to base64, length:', imageUrl.length)
       }
 
-      const recipeData = {
+      console.log('Final imageUrl to save:', imageUrl)
+
+      const recipeData: any = {
         recipeName,
         ingredients: [...ingredients],
         preheatTime,
@@ -429,8 +438,12 @@ function App() {
         electricRate,
         savedAt: new Date().toISOString(),
         totalCost,
-        costPerUnit,
-        imageUrl
+        costPerUnit
+      }
+
+      // Only add imageUrl if it exists
+      if (imageUrl) {
+        recipeData.imageUrl = imageUrl
       }
 
       if (isUsingFirestore) {
