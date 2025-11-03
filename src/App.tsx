@@ -1416,7 +1416,7 @@ function App() {
           </div>
 
           {/* Packaging */}
-          <div className="mb-6">
+          <div className="mb-0">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Packaging</h3>
             <div className="bg-white rounded-lg p-4">
               <div className="flex justify-between text-sm">
@@ -1429,7 +1429,7 @@ function App() {
           </div>
 
           {/* Totals */}
-          <div className="flex justify-between items-center mt-6 mb-3">
+          <div className="flex justify-between items-center mt-12 mb-3">
             <span className="text-xl font-bold text-gray-900">Grand Total</span>
             <span className="text-2xl font-bold text-green-700">${grandTotal.toFixed(2)}</span>
           </div>
@@ -1437,7 +1437,7 @@ function App() {
             <span className="text-gray-700">Grand Total (without labor)</span>
             <span className="font-semibold text-green-600">${grandTotalWithoutLabor.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-center mt-6 mb-2">
+          <div className="flex justify-between items-center mt-12 mb-2">
             <span className="text-lg font-semibold text-gray-800">
               Cost per {yieldUnit.toLowerCase()}
             </span>
