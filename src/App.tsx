@@ -1358,8 +1358,8 @@ function App() {
         </div>
 
         {/* Cost Breakdown */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg px-6 pb-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 pt-3">💰 Cost Breakdown</h2>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg px-6 pb-6 pt-4 shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">💰 Cost Breakdown</h2>
 
           {/* Ingredients */}
           <div className="mb-6">
