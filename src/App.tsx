@@ -1092,8 +1092,9 @@ function App() {
           </div>
 
           {/* Column Labels - using grid for perfect alignment */}
-          <div className="grid grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
+          <div className="grid grid-cols-[1fr_2.5rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
             <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
+            <div className="px-1 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 text-center">DB</div>
             <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
             <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
             <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg size</div>
@@ -1104,46 +1105,46 @@ function App() {
 
           <div className="space-y-3">
             {ingredients.map((ing, idx) => (
-              <div key={idx} className="grid grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                <div className="relative" style={{ width: '100%', minWidth: 0, display: 'flex', gap: '0.25rem' }}>
-                  <input
-                    type="text"
-                    placeholder="Type or select from DB"
-                    value={ing.name}
-                    onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    list={`ingredient-suggestions-${idx}`}
-                    style={{ flex: 1, minWidth: 0 }}
-                  />
-                  <datalist id={`ingredient-suggestions-${idx}`}>
-                    {ingredientDB.map((dbIng) => (
-                      <option key={dbIng.id} value={dbIng.name} />
-                    ))}
-                  </datalist>
-                  {ingredientDB.length > 0 && (
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          const selected = ingredientDB.find(db => db.id === e.target.value)
-                          if (selected) {
-                            selectIngredientFromDB(idx, selected)
-                          }
+              <div key={idx} className="grid grid-cols-[1fr_2.5rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder="Type or select from DB"
+                  value={ing.name}
+                  onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  list={`ingredient-suggestions-${idx}`}
+                  style={{ width: '100%', minWidth: 0 }}
+                />
+                <datalist id={`ingredient-suggestions-${idx}`}>
+                  {ingredientDB.map((dbIng) => (
+                    <option key={dbIng.id} value={dbIng.name} />
+                  ))}
+                </datalist>
+                {ingredientDB.length > 0 ? (
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const selected = ingredientDB.find(db => db.id === e.target.value)
+                        if (selected) {
+                          selectIngredientFromDB(idx, selected)
                         }
-                        e.target.value = '' // Reset select
-                      }}
-                      className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
-                      defaultValue=""
-                      style={{ flexShrink: 0 }}
-                    >
-                      <option value="">📋</option>
-                      {ingredientDB.map((dbIng) => (
-                        <option key={dbIng.id} value={dbIng.id}>
-                          {dbIng.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
+                      }
+                      e.target.value = '' // Reset select
+                    }}
+                    className="px-1 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                    defaultValue=""
+                    style={{ width: '100%', minWidth: 0 }}
+                  >
+                    <option value="">📋</option>
+                    {ingredientDB.map((dbIng) => (
+                      <option key={dbIng.id} value={dbIng.id}>
+                        {dbIng.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div style={{ width: '100%', minWidth: 0 }}></div>
+                )}
                 <input
                   type="number"
                   placeholder="500"
