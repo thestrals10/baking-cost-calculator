@@ -1452,8 +1452,8 @@ function App() {
               </div>
             </div>
           </div>
-          <div className="text-center text-sm text-gray-600 mt-3">
-            Based on {yieldQty} {yieldUnit.toLowerCase()}
+          <div className="text-center text-sm text-gray-600" style={{marginTop: '24px'}}>
+            Based on 1 yield = {yieldQty} {yieldUnit.toLowerCase()}
           </div>
         </div>
       </div>
