@@ -1434,11 +1434,11 @@ function App() {
             <span className="text-2xl font-bold text-green-700">${grandTotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center mb-3 text-sm">
-            <span className="text-gray-700">Grand Total (without labor)</span>
+            <span className="font-bold text-gray-700">Grand Total (without labor)</span>
             <span className="font-semibold text-green-600">${grandTotalWithoutLabor.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center mt-12 mb-2">
-            <span className="text-lg font-semibold text-gray-800">
+            <span className="text-lg font-bold text-gray-800">
               Cost per {yieldUnit.toLowerCase()}
             </span>
             <span className="text-3xl font-bold text-green-600">
@@ -1446,7 +1446,7 @@ function App() {
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-700">Cost per {yieldUnit.toLowerCase()} (without labor)</span>
+            <span className="font-bold text-gray-700">Cost per {yieldUnit.toLowerCase()} (without labor)</span>
             <span className="font-semibold text-green-600">${costPerUnitWithoutLabor.toFixed(2)}</span>
           </div>
           <div className="text-center text-sm text-gray-600 mt-3">
