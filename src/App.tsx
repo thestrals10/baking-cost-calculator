@@ -258,6 +258,10 @@ const loadSavedData = () => {
           packageUnit: ing.packageUnit || ing.unit || 'g'
         }))
       }
+      // Add stovetopProcesses to old saved data that doesn't have it
+      if (!data.stovetopProcesses) {
+        data.stovetopProcesses = []
+      }
       return data
     } catch (e) {
       console.error('Error loading saved data:', e)
@@ -278,6 +282,7 @@ const loadSavedData = () => {
     yieldUnit: 'unit',
     gasRate: 2.6,
     electricRate: 0.18,
+    stovetopProcesses: [],
   }
 }
 
