@@ -1342,7 +1342,7 @@ function App() {
                       ))}
                     </datalist>
                     {ingredientDB.length > 0 ? (
-                      <div className="relative" style={{ width: '100%', minWidth: 0 }}>
+                      <div style={{ width: '100%', minWidth: 0, position: 'relative' }}>
                         <input
                           type="text"
                           placeholder="🔍"
@@ -1359,8 +1359,8 @@ function App() {
                           }}
                           className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full"
                         />
-                        {(ingredientDropdownOpen[idx] || false) && (
-                          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                        {ingredientDropdownOpen[idx] && (
+                          <div className="absolute z-50 left-0 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1" style={{ minWidth: '200px' }}>
                             {ingredientDB
                               .filter(ing =>
                                 ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
