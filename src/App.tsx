@@ -695,7 +695,7 @@ function App() {
     setStovetopProcesses([...stovetopProcesses, newProcess])
   }
 
-  const updateStovetopProcess = (index: number, field: keyof StovetopProcess, value: string | number) => {
+  const updateStovetopProcess = (index: number, field: keyof StovetopProcess, value: string | number | undefined) => {
     const updated = [...stovetopProcesses]
     updated[index] = { ...updated[index], [field]: value }
     setStovetopProcesses(updated)
