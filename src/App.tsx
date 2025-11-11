@@ -1007,9 +1007,8 @@ function App() {
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">{recipe.recipeName}</h3>
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>Yield: {recipe.yieldQty} {recipe.yieldUnit}</p>
-                          <p>Total Cost: <span className="font-semibold text-green-700">${recipe.totalCost?.toFixed(2) || '0.00'}</span></p>
                           <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')} (with labor): <span className="font-semibold text-blue-700">${recipe.costPerUnit?.toFixed(2) || '0.00'}</span></p>
-                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')} (without labor): <span className="font-semibold text-purple-700">${recipe.costPerUnitWithoutLabor?.toFixed(2) || '0.00'}</span></p>
+                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')} (without labor): <span className="font-semibold text-purple-700">${(recipe.costPerUnitWithoutLabor ?? (recipe.totalCost && recipe.yieldQty ? ((recipe.totalCost - (recipe.laborTime / 60 * recipe.laborRate)) / recipe.yieldQty) : 0))?.toFixed(2) || '0.00'}</span></p>
                           <p className="text-xs text-gray-400">Saved: {new Date(recipe.savedAt).toLocaleDateString()} {new Date(recipe.savedAt).toLocaleTimeString()}</p>
                         </div>
                       </div>
@@ -1314,7 +1313,7 @@ function App() {
           <div className="overflow-x-auto">
             <div style={{ minWidth: '700px' }}>
               {/* Column Labels - using grid for perfect alignment */}
-              <div className="grid grid-cols-[1fr_2.5rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
+              <div className="grid grid-cols-[1fr_4rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
                 <div className="px-1 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 text-center">DB</div>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
@@ -1327,7 +1326,7 @@ function App() {
 
               <div className="space-y-3">
                 {ingredients.map((ing, idx) => (
-                  <div key={idx} className="grid grid-cols-[1fr_2.5rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
+                  <div key={idx} className="grid grid-cols-[1fr_4rem_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
                     <input
                       type="text"
                       placeholder="Type or select from DB"
@@ -1347,7 +1346,7 @@ function App() {
                         <input
                           type="text"
                           placeholder="🔍"
-                          value={ingredientSearchFilter[idx] || ''}
+                          value={ingredientSearchFilter[idx] ?? ''}
                           onChange={(e) => {
                             setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })
                             setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: true })
@@ -1360,11 +1359,11 @@ function App() {
                           }}
                           className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full"
                         />
-                        {ingredientDropdownOpen[idx] && (
+                        {(ingredientDropdownOpen[idx] || false) && (
                           <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
                             {ingredientDB
                               .filter(ing =>
-                                ing.name.toLowerCase().includes((ingredientSearchFilter[idx] || '').toLowerCase())
+                                ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
                               )
                               .map((dbIng) => (
                                 <button
@@ -1380,7 +1379,7 @@ function App() {
                                 </button>
                               ))}
                             {ingredientDB.filter(ing =>
-                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] || '').toLowerCase())
+                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
                             ).length === 0 && (
                               <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
                             )}
