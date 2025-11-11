@@ -19,7 +19,8 @@ export function useFirestoreDoc<T>(docPath: string, defaultValue: T) {
 
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
-        setData(snapshot.data() as T);
+        // Merge defaults with saved data to handle new fields in schema updates
+        setData({ ...defaultValue, ...snapshot.data() } as T);
       } else {
         // Document doesn't exist yet, use default and create it
         setDoc(docRef, defaultValue as any).catch(console.error);
