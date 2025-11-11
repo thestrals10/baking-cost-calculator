@@ -1342,52 +1342,58 @@ function App() {
                       ))}
                     </datalist>
                     {ingredientDB.length > 0 ? (
-                      <div style={{ width: '100%', minWidth: 0, position: 'relative' }}>
-                        <input
-                          type="text"
-                          placeholder="🔍"
-                          value={ingredientSearchFilter[idx] ?? ''}
-                          onChange={(e) => {
-                            setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })
-                            setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: true })
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: !ingredientDropdownOpen[idx] })
+                            if (!ingredientDropdownOpen[idx]) {
+                              setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
+                            }
                           }}
-                          onFocus={() => setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: true })}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
-                            }, 200)
-                          }}
-                          className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full"
-                        />
+                          className="px-2 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full h-full"
+                        >
+                          🔍
+                        </button>
                         {ingredientDropdownOpen[idx] && (
-                          <div className="absolute z-50 left-0 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1" style={{ minWidth: '200px' }}>
-                            {ingredientDB
-                              .filter(ing =>
+                          <div className="absolute z-50 right-0 bg-white border border-gray-300 rounded-md shadow-lg mt-1 p-2" style={{ minWidth: '250px' }}>
+                            <input
+                              type="text"
+                              placeholder="Search ingredients..."
+                              value={ingredientSearchFilter[idx] ?? ''}
+                              onChange={(e) => setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })}
+                              autoFocus
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
+                            />
+                            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded">
+                              {ingredientDB
+                                .filter(ing =>
+                                  ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
+                                )
+                                .map((dbIng) => (
+                                  <button
+                                    key={dbIng.id}
+                                    onClick={() => {
+                                      selectIngredientFromDB(idx, dbIng)
+                                      setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
+                                      setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
+                                    }}
+                                    className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
+                                  >
+                                    {dbIng.name}
+                                  </button>
+                                ))}
+                              {ingredientDB.filter(ing =>
                                 ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                              )
-                              .map((dbIng) => (
-                                <button
-                                  key={dbIng.id}
-                                  onClick={() => {
-                                    selectIngredientFromDB(idx, dbIng)
-                                    setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
-                                    setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
-                                  }}
-                                  className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
-                                >
-                                  {dbIng.name}
-                                </button>
-                              ))}
-                            {ingredientDB.filter(ing =>
-                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                            ).length === 0 && (
-                              <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
-                            )}
+                              ).length === 0 && (
+                                <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div style={{ width: '100%', minWidth: 0 }}></div>
+                      <div></div>
                     )}
                     <input
                       type="number"
