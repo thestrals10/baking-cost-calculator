@@ -185,6 +185,16 @@ interface Ingredient {
   packagePrice: number
 }
 
+interface StovetopProcess {
+  id: string
+  name: string
+  stoveType: 'gas' | 'electric' | 'induction'
+  burnerBTU?: number
+  burnerWattage?: number
+  powerLevel: number
+  duration: number
+}
+
 interface Recipe {
   id: string
   recipeName: string
@@ -200,6 +210,7 @@ interface Recipe {
   yieldUnit: string
   gasRate: number
   electricRate: number
+  stovetopProcesses: StovetopProcess[]
   savedAt: string
   totalCost?: number
   costPerUnit?: number
@@ -224,6 +235,14 @@ interface Settings {
   gasRate: number
   electricRate: number
   packagingOptions: PackagingOption[]
+  // Stovetop defaults
+  stoveType: 'gas' | 'electric' | 'induction'
+  gasBurnerBTU: number
+  electricBurnerWattage: number
+  inductionBurnerWattage: number
+  gasBurnerEfficiency: number
+  electricBurnerEfficiency: number
+  inductionBurnerEfficiency: number
 }
 
 // Load saved data from localStorage or use defaults
@@ -306,18 +325,52 @@ function App() {
     laborRate: 20,
     gasRate: 2.6,
     electricRate: 0.18,
-    packagingOptions: []
+    packagingOptions: [],
+    stoveType: 'gas',
+    gasBurnerBTU: 12000,
+    electricBurnerWattage: 1500,
+    inductionBurnerWattage: 1800,
+    gasBurnerEfficiency: 0.4,
+    electricBurnerEfficiency: 0.75,
+    inductionBurnerEfficiency: 0.85
   })
   const [localSettings, setLocalSettings] = useState<Settings>(() => {
     const saved = localStorage.getItem('settings')
-    return saved ? JSON.parse(saved) : {
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // Add defaults for missing stovetop fields
+      return {
+        laborRate: parsed.laborRate ?? 20,
+        gasRate: parsed.gasRate ?? 2.6,
+        electricRate: parsed.electricRate ?? 0.18,
+        packagingOptions: parsed.packagingOptions ?? [
+          { id: '1', name: 'Cake board and box', cost: 2.0 },
+          { id: '2', name: 'Bread bag', cost: 0.2 }
+        ],
+        stoveType: parsed.stoveType ?? 'gas',
+        gasBurnerBTU: parsed.gasBurnerBTU ?? 12000,
+        electricBurnerWattage: parsed.electricBurnerWattage ?? 1500,
+        inductionBurnerWattage: parsed.inductionBurnerWattage ?? 1800,
+        gasBurnerEfficiency: parsed.gasBurnerEfficiency ?? 0.4,
+        electricBurnerEfficiency: parsed.electricBurnerEfficiency ?? 0.75,
+        inductionBurnerEfficiency: parsed.inductionBurnerEfficiency ?? 0.85
+      }
+    }
+    return {
       laborRate: 20,
       gasRate: 2.6,
       electricRate: 0.18,
       packagingOptions: [
         { id: '1', name: 'Cake board and box', cost: 2.0 },
         { id: '2', name: 'Bread bag', cost: 0.2 }
-      ]
+      ],
+      stoveType: 'gas',
+      gasBurnerBTU: 12000,
+      electricBurnerWattage: 1500,
+      inductionBurnerWattage: 1800,
+      gasBurnerEfficiency: 0.4,
+      electricBurnerEfficiency: 0.75,
+      inductionBurnerEfficiency: 0.85
     }
   })
   const settings = isUsingFirestore ? firestoreSettings.data : localSettings
@@ -351,6 +404,9 @@ function App() {
   // Energy rates
   const [gasRate, setGasRate] = useState(savedData.gasRate)
   const [electricRate, setElectricRate] = useState(savedData.electricRate)
+
+  // Stovetop processes
+  const [stovetopProcesses, setStovetopProcesses] = useState<StovetopProcess[]>(savedData.stovetopProcesses || [])
 
   // Show loading screen while checking authentication
   if (loading) {
@@ -390,6 +446,7 @@ function App() {
       yieldUnit,
       gasRate,
       electricRate,
+      stovetopProcesses: [...stovetopProcesses],
       savedAt: new Date().toISOString(),
       totalCost,
       costPerUnit
@@ -443,6 +500,7 @@ function App() {
     setYieldUnit(recipe.yieldUnit)
     setGasRate(recipe.gasRate)
     setElectricRate(recipe.electricRate)
+    setStovetopProcesses(recipe.stovetopProcesses || [])
     setShowCatalog(false)
     alert('✅ Recipe loaded!')
   }
@@ -606,6 +664,7 @@ function App() {
       setYieldUnit('')
       setGasRate(settings.gasRate)
       setElectricRate(settings.electricRate)
+      setStovetopProcesses([])
       alert('✅ Started new recipe!')
     }
   }
@@ -622,6 +681,28 @@ function App() {
 
   const removeIngredient = (index: number) => {
     setIngredients(ingredients.filter((_, i) => i !== index))
+  }
+
+  // Stovetop process management
+  const addStovetopProcess = () => {
+    const newProcess: StovetopProcess = {
+      id: Date.now().toString(),
+      name: '',
+      stoveType: settings.stoveType,
+      powerLevel: 70,
+      duration: 0
+    }
+    setStovetopProcesses([...stovetopProcesses, newProcess])
+  }
+
+  const updateStovetopProcess = (index: number, field: keyof StovetopProcess, value: string | number) => {
+    const updated = [...stovetopProcesses]
+    updated[index] = { ...updated[index], [field]: value }
+    setStovetopProcesses(updated)
+  }
+
+  const removeStovetopProcess = (index: number) => {
+    setStovetopProcesses(stovetopProcesses.filter((_, i) => i !== index))
   }
 
   // CALCULATIONS
@@ -678,8 +759,47 @@ function App() {
   const mixerKWh = (mixerWattage * mixerHours) / 1000
   const mixerCost = mixerKWh * electricRate
 
+  // Calculate stovetop energy costs
+  const stovetopCosts = stovetopProcesses.map(process => {
+    const durationHours = process.duration / 60
+    const powerFraction = process.powerLevel / 100
+
+    if (process.stoveType === 'gas') {
+      const burnerBTU = process.burnerBTU ?? settings.gasBurnerBTU
+      const effectiveBTU = burnerBTU * powerFraction
+      const therms = (effectiveBTU * durationHours) / 100000 / settings.gasBurnerEfficiency
+      const cost = therms * gasRate
+      return {
+        name: process.name,
+        type: 'gas' as const,
+        therms,
+        kWh: 0,
+        cost
+      }
+    } else {
+      const wattage = process.burnerWattage ??
+        (process.stoveType === 'induction' ?
+          settings.inductionBurnerWattage :
+          settings.electricBurnerWattage)
+      const effectiveWattage = wattage * powerFraction
+      const efficiency = process.stoveType === 'induction' ?
+        settings.inductionBurnerEfficiency :
+        settings.electricBurnerEfficiency
+      const kWh = (effectiveWattage * durationHours) / 1000 / efficiency
+      const cost = kWh * electricRate
+      return {
+        name: process.name,
+        type: process.stoveType,
+        therms: 0,
+        kWh,
+        cost
+      }
+    }
+  })
+  const totalStovetopCost = stovetopCosts.reduce((sum, s) => sum + s.cost, 0)
+
   // Total energy cost
-  const totalEnergyCost = gasCost + mixerCost
+  const totalEnergyCost = gasCost + mixerCost + totalStovetopCost
 
   // Calculate labor cost
   const laborHours = laborTime / 60
@@ -1016,6 +1136,91 @@ function App() {
               </div>
             </div>
 
+            {/* Stovetop Equipment Defaults */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Stovetop Equipment Defaults</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Default Stove Type</label>
+                  <select
+                    value={settings.stoveType}
+                    onChange={(e) => updateSettings('stoveType', e.target.value as 'gas' | 'electric' | 'induction')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    <option value="gas">Gas</option>
+                    <option value="electric">Electric</option>
+                    <option value="induction">Induction</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gas Burner (BTU/hr)</label>
+                  <input
+                    type="number"
+                    step="100"
+                    value={settings.gasBurnerBTU === 0 ? '' : settings.gasBurnerBTU}
+                    onChange={(e) => updateSettings('gasBurnerBTU', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gas Efficiency (%)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={settings.gasBurnerEfficiency === 0 ? '' : (settings.gasBurnerEfficiency * 100)}
+                    onChange={(e) => updateSettings('gasBurnerEfficiency', e.target.value === '' ? 0 : Number(e.target.value) / 100)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Electric Burner (W)</label>
+                  <input
+                    type="number"
+                    step="100"
+                    value={settings.electricBurnerWattage === 0 ? '' : settings.electricBurnerWattage}
+                    onChange={(e) => updateSettings('electricBurnerWattage', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Electric Efficiency (%)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={settings.electricBurnerEfficiency === 0 ? '' : (settings.electricBurnerEfficiency * 100)}
+                    onChange={(e) => updateSettings('electricBurnerEfficiency', e.target.value === '' ? 0 : Number(e.target.value) / 100)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+                <div></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Induction Burner (W)</label>
+                  <input
+                    type="number"
+                    step="100"
+                    value={settings.inductionBurnerWattage === 0 ? '' : settings.inductionBurnerWattage}
+                    onChange={(e) => updateSettings('inductionBurnerWattage', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Induction Efficiency (%)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={settings.inductionBurnerEfficiency === 0 ? '' : (settings.inductionBurnerEfficiency * 100)}
+                    onChange={(e) => updateSettings('inductionBurnerEfficiency', e.target.value === '' ? 0 : Number(e.target.value) / 100)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  />
+                </div>
+                <div></div>
+              </div>
+            </div>
+
             {/* Packaging Options */}
             <div>
               <div className="flex justify-between items-center mb-3">
@@ -1237,6 +1442,112 @@ function App() {
           </div>
         </div>
 
+        {/* Stovetop Processes */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Stovetop Processes</h2>
+            <button
+              onClick={addStovetopProcess}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition"
+            >
+              + Add Process
+            </button>
+          </div>
+
+          {stovetopProcesses.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No stovetop processes added yet. Add processes like "Make syrup" or "Boil water".</p>
+          ) : (
+            <div className="space-y-4">
+              {stovetopProcesses.map((process, idx) => (
+                <div key={process.id} className="border border-gray-300 rounded-lg p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Process Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Make simple syrup"
+                        value={process.name}
+                        onChange={(e) => updateStovetopProcess(idx, 'name', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stove Type</label>
+                      <select
+                        value={process.stoveType}
+                        onChange={(e) => updateStovetopProcess(idx, 'stoveType', e.target.value as 'gas' | 'electric' | 'induction')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      >
+                        <option value="gas">Gas</option>
+                        <option value="electric">Electric</option>
+                        <option value="induction">Induction</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {process.stoveType === 'gas' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Burner BTU/hr (optional)</label>
+                        <input
+                          type="number"
+                          placeholder={`Default: ${settings.gasBurnerBTU}`}
+                          value={process.burnerBTU === undefined ? '' : process.burnerBTU}
+                          onChange={(e) => updateStovetopProcess(idx, 'burnerBTU', e.target.value === '' ? undefined : Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    )}
+                    {process.stoveType !== 'gas' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Burner Wattage (optional)</label>
+                        <input
+                          type="number"
+                          placeholder={`Default: ${process.stoveType === 'induction' ? settings.inductionBurnerWattage : settings.electricBurnerWattage}`}
+                          value={process.burnerWattage === undefined ? '' : process.burnerWattage}
+                          onChange={(e) => updateStovetopProcess(idx, 'burnerWattage', e.target.value === '' ? undefined : Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Power Level (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="70"
+                        value={process.powerLevel === 0 ? '' : process.powerLevel}
+                        onChange={(e) => updateStovetopProcess(idx, 'powerLevel', e.target.value === '' ? 0 : Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Duration (min)</label>
+                      <input
+                        type="number"
+                        placeholder="10"
+                        value={process.duration === 0 ? '' : process.duration}
+                        onChange={(e) => updateStovetopProcess(idx, 'duration', e.target.value === '' ? 0 : Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => removeStovetopProcess(idx)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                    >
+                      Remove Process
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Mixer & Labor */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Mixer & Labor</h2>
@@ -1395,6 +1706,14 @@ function App() {
                 </span>
                 <span className="font-medium text-gray-900">${mixerCost.toFixed(2)}</span>
               </div>
+              {stovetopCosts.map((stove, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-gray-700">
+                    Stovetop - {stove.name} ({stove.type === 'gas' ? `${stove.therms.toFixed(3)} therms` : `${stove.kWh.toFixed(3)} kWh`})
+                  </span>
+                  <span className="font-medium text-gray-900">${stove.cost.toFixed(2)}</span>
+                </div>
+              ))}
               <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
                 <span className="text-gray-800">Energy Total</span>
                 <span className="text-blue-600">${totalEnergyCost.toFixed(2)}</span>
