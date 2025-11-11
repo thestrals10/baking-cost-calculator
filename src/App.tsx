@@ -21,6 +21,10 @@ const WEIGHT_CONVERSIONS: { [key: string]: number } = {
   lb: 453.592,
   pound: 453.592,
   pounds: 453.592,
+  // Count conversions (eggs = 55g average)
+  ct: 55,
+  count: 55,
+  piece: 55,
 }
 
 const VOLUME_CONVERSIONS: { [key: string]: number } = {
@@ -214,6 +218,7 @@ interface Recipe {
   savedAt: string
   totalCost?: number
   costPerUnit?: number
+  costPerUnitWithoutLabor?: number
 }
 
 interface IngredientDatabase {
@@ -386,6 +391,8 @@ function App() {
 
   // Ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>(savedData.ingredients)
+  const [ingredientDropdownOpen, setIngredientDropdownOpen] = useState<{ [key: number]: boolean }>({})
+  const [ingredientSearchFilter, setIngredientSearchFilter] = useState<{ [key: number]: string }>({})
 
   // Oven settings
   const [preheatTime, setPreheatTime] = useState(savedData.preheatTime)
@@ -431,7 +438,7 @@ function App() {
   }
 
   // Save recipe to catalog
-  const saveRecipeToCatalog = async (totalCost: number, costPerUnit: number) => {
+  const saveRecipeToCatalog = async (totalCost: number, costPerUnit: number, costPerUnitWithoutLabor: number) => {
     if (!recipeName.trim()) {
       alert('⚠️ Please enter a recipe name before saving!')
       return
@@ -454,7 +461,8 @@ function App() {
       stovetopProcesses: [...stovetopProcesses],
       savedAt: new Date().toISOString(),
       totalCost,
-      costPerUnit
+      costPerUnit,
+      costPerUnitWithoutLabor
     }
 
     // Check if recipe with same name exists
@@ -923,7 +931,7 @@ function App() {
               ✨ New Recipe
             </button>
             <button
-              onClick={() => saveRecipeToCatalog(grandTotal, costPerUnit)}
+              onClick={() => saveRecipeToCatalog(grandTotal, costPerUnit, costPerUnitWithoutLabor)}
               className="px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white text-sm sm:text-base font-semibold rounded-md hover:bg-green-700 transition shadow-md whitespace-nowrap"
             >
               💾 Save Recipe
@@ -1000,7 +1008,8 @@ function App() {
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>Yield: {recipe.yieldQty} {recipe.yieldUnit}</p>
                           <p>Total Cost: <span className="font-semibold text-green-700">${recipe.totalCost?.toFixed(2) || '0.00'}</span></p>
-                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')}: <span className="font-semibold text-blue-700">${recipe.costPerUnit?.toFixed(2) || '0.00'}</span></p>
+                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')} (with labor): <span className="font-semibold text-blue-700">${recipe.costPerUnit?.toFixed(2) || '0.00'}</span></p>
+                          <p>Cost per {recipe.yieldUnit.toLowerCase().replace(/s$/, '')} (without labor): <span className="font-semibold text-purple-700">${recipe.costPerUnitWithoutLabor?.toFixed(2) || '0.00'}</span></p>
                           <p className="text-xs text-gray-400">Saved: {new Date(recipe.savedAt).toLocaleDateString()} {new Date(recipe.savedAt).toLocaleTimeString()}</p>
                         </div>
                       </div>
@@ -1334,27 +1343,50 @@ function App() {
                       ))}
                     </datalist>
                     {ingredientDB.length > 0 ? (
-                      <select
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            const selected = ingredientDB.find(db => db.id === e.target.value)
-                            if (selected) {
-                              selectIngredientFromDB(idx, selected)
-                            }
-                          }
-                          e.target.value = '' // Reset select
-                        }}
-                        className="px-1 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
-                        defaultValue=""
-                        style={{ width: '100%', minWidth: 0 }}
-                      >
-                        <option value="">📋</option>
-                        {ingredientDB.map((dbIng) => (
-                          <option key={dbIng.id} value={dbIng.id}>
-                            {dbIng.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative" style={{ width: '100%', minWidth: 0 }}>
+                        <input
+                          type="text"
+                          placeholder="🔍"
+                          value={ingredientSearchFilter[idx] || ''}
+                          onChange={(e) => {
+                            setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })
+                            setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: true })
+                          }}
+                          onFocus={() => setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: true })}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
+                            }, 200)
+                          }}
+                          className="px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full"
+                        />
+                        {ingredientDropdownOpen[idx] && (
+                          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                            {ingredientDB
+                              .filter(ing =>
+                                ing.name.toLowerCase().includes((ingredientSearchFilter[idx] || '').toLowerCase())
+                              )
+                              .map((dbIng) => (
+                                <button
+                                  key={dbIng.id}
+                                  onClick={() => {
+                                    selectIngredientFromDB(idx, dbIng)
+                                    setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
+                                    setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
+                                  }}
+                                  className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
+                                >
+                                  {dbIng.name}
+                                </button>
+                              ))}
+                            {ingredientDB.filter(ing =>
+                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] || '').toLowerCase())
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div style={{ width: '100%', minWidth: 0 }}></div>
                     )}
