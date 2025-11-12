@@ -1309,140 +1309,143 @@ function App() {
             </button>
           </div>
 
-          {/* Column Labels - using grid for perfect alignment */}
-              <div className="grid grid-cols-[3rem_1fr_5rem_4rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
-                <div className="px-1 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 text-center">DB</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 hidden md:block">Pkg size</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 hidden lg:block">Pkg unit</div>
-                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 hidden md:block">Pkg price</div>
-                <div className="w-[3.25rem] lg:w-[3.25rem] md:w-[3rem] w-[3rem] flex-shrink-0"></div> {/* Spacer for delete button */}
-              </div>
+          {/* Table wrapper with horizontal scroll */}
+          <div className="overflow-x-auto">
+            {/* Column Labels - using grid for perfect alignment */}
+            <div className="grid grid-cols-[3rem_1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
+              <div className="px-1 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 text-center">DB</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg size</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg unit</div>
+              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg price</div>
+              <div className="lg:w-[3.25rem] md:w-[3rem] w-[3rem] flex-shrink-0"></div> {/* Spacer for delete button */}
+            </div>
 
-              <div className="space-y-3">
-                {ingredients.map((ing, idx) => (
-                  <div key={idx} className="grid grid-cols-[3rem_1fr_5rem_4rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                    {ingredientDB.length > 0 ? (
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: !ingredientDropdownOpen[idx] })
-                            if (!ingredientDropdownOpen[idx]) {
-                              setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
-                            }
-                          }}
-                          className="px-2 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full h-full"
-                        >
-                          🔍
-                        </button>
-                        {ingredientDropdownOpen[idx] && (
-                          <div className="absolute z-50 right-0 bg-white border border-gray-300 rounded-md shadow-lg mt-1 p-2" style={{ minWidth: '250px' }}>
-                            <input
-                              type="text"
-                              placeholder="Search ingredients..."
-                              value={ingredientSearchFilter[idx] ?? ''}
-                              onChange={(e) => setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })}
-                              autoFocus
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
-                            />
-                            <div className="max-h-48 overflow-y-auto border border-gray-200 rounded">
-                              {ingredientDB
-                                .filter(ing =>
-                                  ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                                )
-                                .map((dbIng) => (
-                                  <button
-                                    key={dbIng.id}
-                                    onClick={() => {
-                                      selectIngredientFromDB(idx, dbIng)
-                                      setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
-                                      setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
-                                    }}
-                                    className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
-                                  >
-                                    {dbIng.name}
-                                  </button>
-                                ))}
-                              {ingredientDB.filter(ing =>
+            <div className="space-y-3">
+              {ingredients.map((ing, idx) => (
+                <div key={idx} className="grid grid-cols-[3rem_1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
+                  {ingredientDB.length > 0 ? (
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: !ingredientDropdownOpen[idx] })
+                          if (!ingredientDropdownOpen[idx]) {
+                            setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
+                          }
+                        }}
+                        className="px-2 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full h-full"
+                      >
+                        🔍
+                      </button>
+                      {ingredientDropdownOpen[idx] && (
+                        <div className="absolute z-50 right-0 bg-white border border-gray-300 rounded-md shadow-lg mt-1 p-2" style={{ minWidth: '250px' }}>
+                          <input
+                            type="text"
+                            placeholder="Search ingredients..."
+                            value={ingredientSearchFilter[idx] ?? ''}
+                            onChange={(e) => setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })}
+                            autoFocus
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
+                          />
+                          <div className="max-h-48 overflow-y-auto border border-gray-200 rounded">
+                            {ingredientDB
+                              .filter(ing =>
                                 ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                              ).length === 0 && (
-                                <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
-                              )}
-                            </div>
+                              )
+                              .map((dbIng) => (
+                                <button
+                                  key={dbIng.id}
+                                  onClick={() => {
+                                    selectIngredientFromDB(idx, dbIng)
+                                    setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
+                                    setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
+                                  }}
+                                  className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
+                                >
+                                  {dbIng.name}
+                                </button>
+                              ))}
+                            {ingredientDB.filter(ing =>
+                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div></div>
-                    )}
-                    <input
-                      type="text"
-                      placeholder="Type or select from DB"
-                      value={ing.name}
-                      onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      list={`ingredient-suggestions-${idx}`}
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <datalist id={`ingredient-suggestions-${idx}`}>
-                      {ingredientDB.map((dbIng) => (
-                        <option key={dbIng.id} value={dbIng.name} />
-                      ))}
-                    </datalist>
-                    <input
-                      type="number"
-                      placeholder="500"
-                      value={ing.quantity === 0 ? '' : ing.quantity}
-                      onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="g"
-                      value={ing.unit}
-                      onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <input
-                      type="number"
-                      placeholder="2268"
-                      value={ing.packageSize === 0 ? '' : ing.packageSize}
-                      onChange={(e) => updateIngredient(idx, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden md:block"
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="g"
-                      value={ing.packageUnit}
-                      onChange={(e) => updateIngredient(idx, 'packageUnit', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden lg:block"
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="10.00"
-                      value={ing.packagePrice === 0 ? '' : ing.packagePrice}
-                      onChange={(e) => updateIngredient(idx, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden md:block"
-                      style={{ width: '100%', minWidth: 0 }}
-                    />
-                    <button
-                      onClick={() => removeIngredient(idx)}
-                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition lg:w-[3.25rem] md:w-[3rem] w-[3rem]"
-                      style={{ flexShrink: 0 }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div></div>
+                  )}
+                  <input
+                    type="text"
+                    placeholder="Type or select from DB"
+                    value={ing.name}
+                    onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    list={`ingredient-suggestions-${idx}`}
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <datalist id={`ingredient-suggestions-${idx}`}>
+                    {ingredientDB.map((dbIng) => (
+                      <option key={dbIng.id} value={dbIng.name} />
+                    ))}
+                  </datalist>
+                  <input
+                    type="number"
+                    placeholder="500"
+                    value={ing.quantity === 0 ? '' : ing.quantity}
+                    onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="g"
+                    value={ing.unit}
+                    onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="2268"
+                    value={ing.packageSize === 0 ? '' : ing.packageSize}
+                    onChange={(e) => updateIngredient(idx, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="g"
+                    value={ing.packageUnit}
+                    onChange={(e) => updateIngredient(idx, 'packageUnit', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="10.00"
+                    value={ing.packagePrice === 0 ? '' : ing.packagePrice}
+                    onChange={(e) => updateIngredient(idx, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ width: '100%', minWidth: 0 }}
+                  />
+                  <button
+                    onClick={() => removeIngredient(idx)}
+                    className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition lg:w-[3.25rem] md:w-[3rem] w-[3rem]"
+                    style={{ flexShrink: 0 }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Oven Settings */}
