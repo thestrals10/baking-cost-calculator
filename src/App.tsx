@@ -391,8 +391,6 @@ function App() {
 
   // Ingredients
   const [ingredients, setIngredients] = useState<Ingredient[]>(savedData.ingredients)
-  const [ingredientDropdownOpen, setIngredientDropdownOpen] = useState<{ [key: number]: boolean }>({})
-  const [ingredientSearchFilter, setIngredientSearchFilter] = useState<{ [key: number]: string }>({})
 
   // Oven settings
   const [preheatTime, setPreheatTime] = useState(savedData.preheatTime)
@@ -1312,8 +1310,7 @@ function App() {
           {/* Table wrapper with horizontal scroll */}
           <div className="overflow-x-auto">
             {/* Column Labels - using grid for perfect alignment */}
-            <div className="grid grid-cols-[3rem_1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
-              <div className="px-1 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0 text-center">DB</div>
+            <div className="grid grid-cols-[1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
               <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
               <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
               <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
@@ -1325,66 +1322,21 @@ function App() {
 
             <div className="space-y-3">
               {ingredients.map((ing, idx) => (
-                <div key={idx} className="grid grid-cols-[3rem_1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[3.5rem_1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[4rem_1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                  {ingredientDB.length > 0 ? (
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: !ingredientDropdownOpen[idx] })
-                          if (!ingredientDropdownOpen[idx]) {
-                            setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
-                          }
-                        }}
-                        className="px-2 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm w-full h-full"
-                      >
-                        🔍
-                      </button>
-                      {ingredientDropdownOpen[idx] && (
-                        <div className="absolute z-50 right-0 bg-white border border-gray-300 rounded-md shadow-lg mt-1 p-2" style={{ minWidth: '250px' }}>
-                          <input
-                            type="text"
-                            placeholder="Search ingredients..."
-                            value={ingredientSearchFilter[idx] ?? ''}
-                            onChange={(e) => setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: e.target.value })}
-                            autoFocus
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 text-sm"
-                          />
-                          <div className="max-h-48 overflow-y-auto border border-gray-200 rounded">
-                            {ingredientDB
-                              .filter(ing =>
-                                ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                              )
-                              .map((dbIng) => (
-                                <button
-                                  key={dbIng.id}
-                                  onClick={() => {
-                                    selectIngredientFromDB(idx, dbIng)
-                                    setIngredientDropdownOpen({ ...ingredientDropdownOpen, [idx]: false })
-                                    setIngredientSearchFilter({ ...ingredientSearchFilter, [idx]: '' })
-                                  }}
-                                  className="block w-full text-left px-3 py-2 hover:bg-blue-100 text-sm border-b border-gray-100 last:border-b-0"
-                                >
-                                  {dbIng.name}
-                                </button>
-                              ))}
-                            {ingredientDB.filter(ing =>
-                              ing.name.toLowerCase().includes((ingredientSearchFilter[idx] ?? '').toLowerCase())
-                            ).length === 0 && (
-                              <div className="px-3 py-2 text-sm text-gray-500 italic">No ingredients found</div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div></div>
-                  )}
+                <div key={idx} className="grid grid-cols-[1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
                   <input
                     type="text"
                     placeholder="Type or select from DB"
                     value={ing.name}
-                    onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
+                    onChange={(e) => {
+                      updateIngredient(idx, 'name', e.target.value)
+                      // Auto-fill package fields when selecting from datalist
+                      const matchingIngredient = ingredientDB.find(
+                        dbIng => dbIng.name === e.target.value
+                      )
+                      if (matchingIngredient) {
+                        selectIngredientFromDB(idx, matchingIngredient)
+                      }
+                    }}
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     list={`ingredient-suggestions-${idx}`}
                     style={{ width: '100%', minWidth: 0 }}
