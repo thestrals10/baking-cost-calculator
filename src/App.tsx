@@ -1309,93 +1309,89 @@ function App() {
 
           {/* Table wrapper with horizontal scroll */}
           <div className="overflow-x-auto">
-            {/* Column Labels - using grid for perfect alignment */}
-            <div className="grid grid-cols-[1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 mb-2">
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Name</div>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Used qty</div>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Unit</div>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg size</div>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg unit</div>
-              <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300 min-w-0">Pkg price</div>
-              <div className="lg:w-[3.25rem] md:w-[3rem] w-[3rem] flex-shrink-0"></div> {/* Spacer for delete button */}
-            </div>
+            <div style={{ minWidth: '800px' }}>
+              {/* Column Labels - using grid for perfect alignment */}
+              <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: '320px 80px 80px 80px 80px 80px 60px' }}>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Name</div>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Used qty</div>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Unit</div>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg size</div>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg unit</div>
+                <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Pkg price</div>
+                <div></div> {/* Spacer for delete button */}
+              </div>
 
-            <div className="space-y-3">
-              {ingredients.map((ing, idx) => (
-                <div key={idx} className="grid grid-cols-[1fr_5rem_4rem_5rem_4rem_5rem_3rem] md:grid-cols-[1fr_5.5rem_4.5rem_5.5rem_4.5rem_5.5rem_3rem] lg:grid-cols-[1fr_6rem_5rem_6rem_5rem_6rem_3.25rem] gap-2 items-center">
-                  <input
-                    type="text"
-                    placeholder="Type or select from DB"
-                    value={ing.name}
-                    onChange={(e) => {
-                      updateIngredient(idx, 'name', e.target.value)
-                      // Auto-fill package fields when selecting from datalist
-                      const matchingIngredient = ingredientDB.find(
-                        dbIng => dbIng.name === e.target.value
-                      )
-                      if (matchingIngredient) {
-                        selectIngredientFromDB(idx, matchingIngredient)
-                      }
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    list={`ingredient-suggestions-${idx}`}
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <datalist id={`ingredient-suggestions-${idx}`}>
-                    {ingredientDB.map((dbIng) => (
-                      <option key={dbIng.id} value={dbIng.name} />
-                    ))}
-                  </datalist>
-                  <input
-                    type="number"
-                    placeholder="500"
-                    value={ing.quantity === 0 ? '' : ing.quantity}
-                    onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : Number(e.target.value))}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="g"
-                    value={ing.unit}
-                    onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <input
-                    type="number"
-                    placeholder="2268"
-                    value={ing.packageSize === 0 ? '' : ing.packageSize}
-                    onChange={(e) => updateIngredient(idx, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="g"
-                    value={ing.packageUnit}
-                    onChange={(e) => updateIngredient(idx, 'packageUnit', e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="10.00"
-                    value={ing.packagePrice === 0 ? '' : ing.packagePrice}
-                    onChange={(e) => updateIngredient(idx, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ width: '100%', minWidth: 0 }}
-                  />
-                  <button
-                    onClick={() => removeIngredient(idx)}
-                    className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition lg:w-[3.25rem] md:w-[3rem] w-[3rem]"
-                    style={{ flexShrink: 0 }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
+              <div className="space-y-3">
+                {ingredients.map((ing, idx) => (
+                  <div key={idx} className="grid gap-2 items-center" style={{ gridTemplateColumns: '320px 80px 80px 80px 80px 80px 60px' }}>
+                    <input
+                      type="text"
+                      placeholder="Type or select from DB"
+                      value={ing.name}
+                      onChange={(e) => {
+                        updateIngredient(idx, 'name', e.target.value)
+                        // Auto-fill package fields when selecting from datalist
+                        const matchingIngredient = ingredientDB.find(
+                          dbIng => dbIng.name === e.target.value
+                        )
+                        if (matchingIngredient) {
+                          selectIngredientFromDB(idx, matchingIngredient)
+                        }
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      list={`ingredient-suggestions-${idx}`}
+                    />
+                    <datalist id={`ingredient-suggestions-${idx}`}>
+                      {ingredientDB.map((dbIng) => (
+                        <option key={dbIng.id} value={dbIng.name} />
+                      ))}
+                    </datalist>
+                    <input
+                      type="number"
+                      placeholder="500"
+                      value={ing.quantity === 0 ? '' : ing.quantity}
+                      onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="g"
+                      value={ing.unit}
+                      onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="number"
+                      placeholder="2268"
+                      value={ing.packageSize === 0 ? '' : ing.packageSize}
+                      onChange={(e) => updateIngredient(idx, 'packageSize', e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="g"
+                      value={ing.packageUnit}
+                      onChange={(e) => updateIngredient(idx, 'packageUnit', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="10.00"
+                      value={ing.packagePrice === 0 ? '' : ing.packagePrice}
+                      onChange={(e) => updateIngredient(idx, 'packagePrice', e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() => removeIngredient(idx)}
+                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                      style={{ width: '60px' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
