@@ -907,7 +907,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">🍞 Baking Cost Calculator</h1>
@@ -1311,7 +1311,7 @@ function App() {
           <div className="overflow-x-auto">
             <div>
               {/* Column Labels - using grid for perfect alignment */}
-              <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: 'minmax(180px, 1fr) 80px 80px 80px 80px 80px 60px' }}>
+              <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: 'minmax(140px, 1fr) 80px 80px 80px 80px 80px 30px' }}>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Name</div>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Used qty</div>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Unit</div>
@@ -1323,7 +1323,7 @@ function App() {
 
               <div className="space-y-3">
                 {ingredients.map((ing, idx) => (
-                  <div key={idx} className="grid gap-2 items-center" style={{ gridTemplateColumns: 'minmax(180px, 1fr) 80px 80px 80px 80px 80px 60px' }}>
+                  <div key={idx} className="grid gap-2 items-center" style={{ gridTemplateColumns: 'minmax(140px, 1fr) 80px 80px 80px 80px 80px 30px' }}>
                     <input
                       type="text"
                       placeholder="Type or select from DB"
@@ -1385,7 +1385,7 @@ function App() {
                     <button
                       onClick={() => removeIngredient(idx)}
                       className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-                      style={{ width: '60px' }}
+                      style={{ width: '30px' }}
                     >
                       ✕
                     </button>
