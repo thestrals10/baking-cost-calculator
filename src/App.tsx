@@ -1309,9 +1309,9 @@ function App() {
 
           {/* Table wrapper with horizontal scroll */}
           <div className="overflow-x-auto">
-            <div style={{ minWidth: '800px' }}>
+            <div>
               {/* Column Labels - using grid for perfect alignment */}
-              <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: '320px 80px 80px 80px 80px 80px 60px' }}>
+              <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: 'minmax(180px, 1fr) 80px 80px 80px 80px 80px 60px' }}>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Name</div>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Used qty</div>
                 <div className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md border border-gray-300">Unit</div>
@@ -1323,7 +1323,7 @@ function App() {
 
               <div className="space-y-3">
                 {ingredients.map((ing, idx) => (
-                  <div key={idx} className="grid gap-2 items-center" style={{ gridTemplateColumns: '320px 80px 80px 80px 80px 80px 60px' }}>
+                  <div key={idx} className="grid gap-2 items-center" style={{ gridTemplateColumns: 'minmax(180px, 1fr) 80px 80px 80px 80px 80px 60px' }}>
                     <input
                       type="text"
                       placeholder="Type or select from DB"
